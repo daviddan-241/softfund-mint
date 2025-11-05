@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Softfund NFT Mint</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .container { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0px 0px 15px rgba(0,0,0,0.2);}
+    button { padding: 10px 20px; margin: 10px; cursor: pointer; background-color: #1e40af; color: white; border: none; border-radius: 6px; }
+    button:hover { background-color: #3b82f6; }
+    input { padding: 8px; width: 80px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Softfund NFT Mint</h1>
+    <p id="status">Connect wallet to start minting</p>
+    <button id="connectBtn">Connect Wallet</button>
+    <div id="mintSection" style="display:none;">
+      <p>Connected: <span id="wallet"></span></p>
+      <label>Quantity:</label>
+      <input type="number" id="quantity" value="1" min="1" max="10000">
+      <button id="mintBtn">Mint NFT ($2.672 each)</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "https://cdn.jsdelivr.net/npm/@solana/web3.js@1.72.0/dist/web3.min.js";
+
+    const CONFIG = {
+      METADATA_BASE_URL: "https://gateway.lighthouse.storage/ipfs/",
+      METADATA_CIDS: [
+        "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
+        "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
+        "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
+        "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
+        "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
+        // Placeholder CIDs to simulate 50 total
+        "bafkreiaaaaaaaa1examplecidplaceholder1",
+        "bafkreiaaaaaaaa2examplecidplaceholder2",
+        "bafkreiaaaaaaaa3examplecidplaceholder3",
+        "bafkreiaaaaaaaa4examplecidplaceholder4",
+        "bafkreiaaaaaaaa5examplecidplaceholder5",
+        "bafkreiaaaaaaaa6examplecidplaceholder6",
+        "bafkreiaaaaaaaa7examplecidplaceholder7",
+        "bafkreiaaaaaaaa8examplecidplaceholder8",
+        "bafkreiaaaaaaaa9examplecidplaceholder9",
+        "bafkreiaaaaaaaa10examplecidplaceholder10",
+        "bafkreiaaaaaaaa11examplecidplaceholder11",
+        "bafkreiaaaaaaaa12examplecidplaceholder12",
+        "bafkreiaaaaaaaa13examplecidplaceholder13",
+        "bafkreiaaaaaaaa14examplecidplaceholder14",
+        "bafkreiaaaaaaaa15examplecidplaceholder15",
+        "bafkreiaaaaaaaa16examplecidplaceholder16",
+        "bafkreiaaaaaaaa17examplecidplaceholder17",
+        "bafkreiaaaaaaaa18examplecidplaceholder18",
+        "bafkreiaaaaaaaa19examplecidplaceholder19",
+        "bafkreiaaaaaaaa20examplecidplaceholder20",
+        "bafkreiaaaaaaaa21examplecidplaceholder21",
+        "bafkreiaaaaaaaa22examplecidplaceholder22",
+        "bafkreiaaaaaaaa23examplecidplaceholder23",
+        "bafkreiaaaaaaaa24examplecidplaceholder24",
+        "bafkreiaaaaaaaa25examplecidplaceholder25",
+        "bafkreiaaaaaaaa26examplecidplaceholder26",
+        "bafkreiaaaaaaaa27examplecidplaceholder27",
+        "bafkreiaaaaaaaa28examplecidplaceholder28",
+        "bafkreiaaaaaaaa29examplecidplaceholder29",
+        "bafkreiaaaaaaaa30examplecidplaceholder30",
+        "bafkreiaaaaaaaa31examplecidplaceholder31",
+        "bafkreiaaaaaaaa32examplecidplaceholder32",
+        "bafkreiaaaaaaaa33examplecidplaceholder33",
+        "bafkreiaaaaaaaa34examplecidplaceholder34",
+        "bafkreiaaaaaaaa35examplecidplaceholder35",
+        "bafkreiaaaaaaaa36examplecidplaceholder36",
+        "bafkreiaaaaaaaa37examplecidplaceholder37",
+        "bafkreiaaaaaaaa38examplecidplaceholder38",
+        "bafkreiaaaaaaaa39examplecidplaceholder39",
+        "bafkreiaaaaaaaa40examplecidplaceholder40",
+        "bafkreiaaaaaaaa41examplecidplaceholder41",
+        "bafkreiaaaaaaaa42examplecidplaceholder42",
+        "bafkreiaaaaaaaa43examplecidplaceholder43",
+        "bafkreiaaaaaaaa44examplecidplaceholder44",
+        "bafkreiaaaaaaaa45examplecidplaceholder45",
+        "bafkreiaaaaaaaa46examplecidplaceholder46",
+        "bafkreiaaaaaaaa47examplecidplaceholder47",
+        "bafkreiaaaaaaaa48examplecidplaceholder48",
+        "bafkreiaaaaaaaa49examplecidplaceholder49",
+        "bafkreiaaaaaaaa50examplecidplaceholder50"
+      ],
+      TREASURY_WALLET: "6v4DR5rkDFa3WdCQ35wvtfVYfk7i233Uiu6GmQ7JCdRu",
+      PRICE_USD: 2.672,
+      MAX_SUPPLY: 10000
+    };
+
+    const connectBtn = document.getElementById("connectBtn");
+    const mintBtn = document.getElementById("mintBtn");
+    const statusEl = document.getElementById("status");
+    const walletEl = document.getElementById("wallet");
+    const mintSection = document.getElementById("mintSection");
+    const quantityInput = document.getElementById("quantity");
+
+    let walletAddress = null;
+    let totalMinted = parseInt(localStorage.getItem("softfundMinted") || "0");
+
+    connectBtn.onclick = async () => {
+      try {
+        if (!window.solana) throw new Error("No Solana wallet found. Install Phantom or Trust Wallet.");
+        const resp = await window.solana.connect();
+        walletAddress = resp.publicKey.toString();
+        walletEl.textContent = walletAddress;
+        statusEl.textContent = "Wallet connected!";
+        connectBtn.style.display = "none";
+        mintSection.style.display = "block";
+      } catch (err) {
+        statusEl.textContent = "Failed to connect wallet: " + err.message;
+      }
+    };
+
+    mintBtn.onclick = async () => {
+      if (!walletAddress) return alert("Connect wallet first!");
+      const quantity = parseInt(quantityInput.value);
+      if (quantity < 1 || totalMinted + quantity > CONFIG.MAX_SUPPLY)
+        return alert("Exceeds max supply");
+
+      statusEl.textContent = `Minting ${quantity} NFT(s)...`;
+
+      try {
+        const connection = new Connection("https://api.mainnet-beta.solana.com");
+        const fromPubkey = new PublicKey(walletAddress);
+        const toPubkey = new PublicKey(CONFIG.TREASURY_WALLET);
+
+        for (let i = 0; i < quantity; i++) {
+          const nftNumber = totalMinted + 1;
+
+          if (!CONFIG.METADATA_CIDS[nftNumber - 1])
+            throw new Error(`No metadata CID for NFT #${nftNumber}`);
+
+          const metadataUrl = CONFIG.METADATA_BASE_URL + CONFIG.METADATA_CIDS[nftNumber - 1];
+
+          const tx = new Transaction().add(
+            SystemProgram.transfer({
+              fromPubkey,
+              toPubkey,
+              lamports: CONFIG.PRICE_USD * 0.000001 * LAMPORTS_PER_SOL
+            })
+          );
+
+          const { signature } = await window.solana.signAndSendTransaction(tx);
+          await connection.confirmTransaction(signature);
+
+          totalMinted++;
+          localStorage.setItem("softfundMinted", totalMinted);
+
+          statusEl.textContent = `Minted Softfund #${nftNumber}! Metadata: ${metadataUrl}`;
+        }
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Mint failed: " + err.message;
+      }
+    };
+  </script>
+</body>
+</html>
