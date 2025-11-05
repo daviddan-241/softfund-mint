@@ -4,63 +4,123 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Softfund NFT Mint</title>
+
+<!-- Fonts & Styles -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-  body { font-family: Arial; background:#f4f4f4; display:flex; justify-content:center; align-items:center; height:100vh; }
-  .container { background:white; padding:30px; border-radius:12px; text-align:center; box-shadow:0 0 15px rgba(0,0,0,0.2);}
-  button { padding:10px 20px; margin:10px; cursor:pointer; background-color:#1e40af; color:white; border:none; border-radius:6px; }
-  button:hover { background-color:#3b82f6; }
-  input { padding:8px; width:80px; text-align:center; }
+  body {
+    margin:0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #121212;
+    color: #EAEAEA;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+  }
+
+  .container {
+    background-color:#1a1a1a;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 0 30px rgba(0,0,0,0.5);
+    width:360px;
+    text-align:center;
+  }
+
+  h1 { color:#00FFAA; margin-bottom:15px; }
+  p { margin-bottom:15px; }
+
+  .hero-image {
+    width:100%;
+    border-radius:12px;
+    margin-bottom:20px;
+    border:2px solid #00FFAA;
+  }
+
+  button {
+    padding:10px 20px;
+    margin:10px;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    font-weight:bold;
+    transition: all 0.2s;
+  }
+
+  #connectBtn { background:#FF6F61; color:white; }
+  #connectBtn:hover { background:#FF5A4D; }
+
+  #mintBtn { background:#00FFAA; color:#121212; }
+  #mintBtn:hover { background:#00CC88; }
+
+  input {
+    width:60px;
+    padding:8px;
+    margin-right:10px;
+    border-radius:6px;
+    border:1px solid #00FFAA;
+    text-align:center;
+    background:#1a1a1a;
+    color:#EAEAEA;
+  }
+
+  #status {
+    margin-bottom:15px;
+    font-weight:bold;
+    color:#FF6F61;
+  }
+
+  #metadataList {
+    text-align:left;
+    max-height:150px;
+    overflow-y:auto;
+    margin-top:15px;
+    font-size:0.9em;
+  }
+
+  #metadataList li {
+    border-bottom:1px solid #00FFAA;
+    padding:5px 0;
+  }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <h1>Softfund NFT Mint</h1>
+  <h1>Softfund NFT Collection</h1>
+  <img src="hero-nft.jpg" alt="Hero NFT" class="hero-image">
   <p id="status">Connect your wallet to start minting</p>
+
   <div id="walletButtons"></div>
+
   <div id="mintSection" style="display:none;">
-    <p>Connected: <span id="walletAddress"></span></p>
+    <p>Connected Wallet: <span id="walletAddress"></span></p>
     <label>Quantity:</label>
-    <input type="number" id="quantity" value="1" min="1" max="10000">
+    <input type="number" id="quantity" value="1" min="1" max="25">
     <button id="mintBtn">Mint NFT ($2.672 each)</button>
+    
+    <ul id="metadataList"></ul>
   </div>
 </div>
 
 <script type="module">
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "https://cdn.jsdelivr.net/npm/@solana/web3.js@1.72.0/dist/web3.min.js";
 
-// Configuration
+// === CONFIG ===
 const CONFIG = {
-  TREASURY_WALLET: "6v4DR5rkDFa3WdCQ35wvtfVYfk7i233Uiu6GmQ7JCdRu",
-  PRICE_USD: 2.672,
-  MAX_SUPPLY: 10000,
-  METADATA_BASE_URL: "https://gateway.lighthouse.storage/ipfs/",
-  METADATA_CIDS: [
-    "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
-    "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
-    "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
-    "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
-    "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
-    "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
-    "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami"
-  ]
+    TREASURY_WALLET: "6v4DR5rkDFa3WdCQ35wvtfVYfk7i233Uiu6GmQ7JCdRu",
+    PRICE_USD: 2.672,
+    MAX_SUPPLY: 25,
+    METADATA_CIDS: [
+        "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
+        "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
+        "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
+        "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
+        "bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le",
+        // Add up to 25 metadata CIDs here
+    ]
 };
 
 let totalMinted = parseInt(localStorage.getItem("softfundMinted") || "0");
@@ -70,50 +130,69 @@ const walletAddressSpan = document.getElementById("walletAddress");
 const mintBtn = document.getElementById("mintBtn");
 const quantityInput = document.getElementById("quantity");
 const mintSection = document.getElementById("mintSection");
+const metadataList = document.getElementById("metadataList");
 
-// Connect wallet
+// Populate metadata list
+CONFIG.METADATA_CIDS.forEach((cid, idx) => {
+    const li = document.createElement("li");
+    li.innerHTML = `Softfund #${idx+1}: <a href="https://gateway.lighthouse.storage/ipfs/${cid}" target="_blank">View</a>`;
+    metadataList.appendChild(li);
+});
+
+// === WALLET CONNECT ===
 async function connectWallet() {
-  if (!window.solana) {
-    alert("Please install a Solana wallet (Phantom / Trust Wallet / Solflare)");
-    return;
-  }
-  const resp = await window.solana.connect();
-  walletAddressSpan.textContent = resp.publicKey.toString();
-  statusEl.textContent = "Wallet connected!";
-  mintSection.style.display = "block";
+    if (!window.solana) {
+        alert("Please install a Solana wallet (Phantom / Solflare / Trust Wallet)");
+        return;
+    }
+    try {
+        const resp = await window.solana.connect();
+        walletAddressSpan.textContent = resp.publicKey.toString();
+        statusEl.textContent = "Wallet connected!";
+        mintSection.style.display = "block";
+    } catch (err) {
+        statusEl.textContent = "Wallet connection failed.";
+    }
 }
+
+// Connect button
 const walletButtonsDiv = document.getElementById("walletButtons");
 const connectBtn = document.createElement("button");
+connectBtn.id = "connectBtn";
 connectBtn.innerText = "Connect Wallet";
 connectBtn.onclick = connectWallet;
 walletButtonsDiv.appendChild(connectBtn);
 
-// Minting
+// === MINT LOGIC ===
 mintBtn.onclick = async () => {
-  const qty = parseInt(quantityInput.value);
-  if (totalMinted + qty > CONFIG.MAX_SUPPLY) {
-    alert("Exceeds max supply!");
-    return;
-  }
+    const qty = parseInt(quantityInput.value);
+    if (totalMinted + qty > CONFIG.MAX_SUPPLY) {
+        alert("Exceeds max supply!");
+        return;
+    }
 
-  const solAmount = (CONFIG.PRICE_USD * qty) / 30; // rough SOL conversion (replace with live price API)
-  const tx = new Transaction().add(
-    SystemProgram.transfer({
-      fromPubkey: window.solana.publicKey,
-      toPubkey: new PublicKey(CONFIG.TREASURY_WALLET),
-      lamports: Math.floor(solAmount * LAMPORTS_PER_SOL),
-    })
-  );
+    // Approx USD → SOL (dynamic pricing possible with API)
+    const solAmount = (CONFIG.PRICE_USD * qty) / 30; 
 
-  try {
-    const sig = await window.solana.sendTransaction(tx, window.solana);
-    await window.solana.confirmTransaction(sig);
-    totalMinted += qty;
-    localStorage.setItem("softfundMinted", totalMinted);
-    alert(`Minted ${qty} NFT(s)! Transaction: ${sig}`);
-  } catch (err) {
-    alert("Transaction failed: " + err.message);
-  }
+    const tx = new Transaction().add(
+        SystemProgram.transfer({
+            fromPubkey: window.solana.publicKey,
+            toPubkey: new PublicKey(CONFIG.TREASURY_WALLET),
+            lamports: Math.floor(solAmount * LAMPORTS_PER_SOL),
+        })
+    );
+
+    try {
+        statusEl.textContent = "Transaction in progress...";
+        const sig = await window.solana.sendTransaction(tx, window.solana);
+        await window.solana.confirmTransaction(sig);
+        totalMinted += qty;
+        localStorage.setItem("softfundMinted", totalMinted);
+        alert(`Minted ${qty} NFT(s)! Transaction: ${sig}`);
+        statusEl.textContent = "Mint successful!";
+    } catch (err) {
+        statusEl.textContent = "Transaction failed: " + err.message;
+    }
 };
 </script>
 </body>
