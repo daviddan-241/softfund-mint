@@ -85,7 +85,8 @@ input {
 
 <div class="container">
   <h1>Softfund Exclusive NFT Drop</h1>
-  <img src="https://gateway.lighthouse.storage/ipfs/bafkreihhs2kunfn4dvwundezfqyksisjlqlrsqm77rypz6c7dmhwu3uy5y" alt="Softfund #1" class="hero-image">
+  <!-- Updated Hero Image -->
+  <img src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="Softfund #1" class="hero-image">
   <p id="status">Connect your wallet to mint your Softfund NFT!</p>
 
   <div id="walletButtons"></div>
@@ -109,12 +110,12 @@ const CONFIG = {
     PRICE_USD: 2.672,
     MAX_SUPPLY: 25,
     METADATA_CIDS: [
+        "bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le",
         "bafkreihhs2kunfn4dvwundezfqyksisjlqlrsqm77rypz6c7dmhwu3uy5y",
         "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
         "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
-        "bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le",
         "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra"
-        // Add up to 25 total CIDs here
+        // Add more CIDs up to 25
     ]
 };
 
@@ -165,8 +166,8 @@ mintBtn.onclick = async () => {
         return;
     }
 
-    // Approx USD → SOL (adjust as needed)
-    const solAmount = (CONFIG.PRICE_USD * qty) / 30;
+    // Approx USD → SOL (adjust exchange rate manually)
+    const solAmount = (CONFIG.PRICE_USD * qty) / 30; // e.g., 1 SOL = $30
 
     const tx = new Transaction().add(
         SystemProgram.transfer({
