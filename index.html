@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Softfund (STFD) • Mainnet Mint (wallet approval required)</title>
+<title>Softfund (STFD)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg:#0f0f1a;--card:#1a1a2e;--accent:#00d4ff;--text:#e0e0ff;--gray:#94a3b8;--green:#00ff88;--red:#ff4444}
@@ -25,20 +25,22 @@ body{font-family:Inter,system-ui,Arial;background:linear-gradient(135deg,#0f0f1a
 .tile{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;text-align:center}
 .tile img{width:100%;height:88px;object-fit:cover;border-radius:6px}
 .sold{color:var(--red);font-weight:800;font-size:1.1rem;margin-top:12px}
+.form-file{margin-top:10px}
+.input{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);color:var(--text)}
+.copy-btn{margin-left:8px;padding:6px 8px;border-radius:6px;background:var(--accent);color:#000;border:none;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="row">
     <div class="left">
-      <h2 style="margin-bottom:6px">Softfund (STFD) • Mainnet Mint</h2>
-      <div class="small" style="margin-bottom:10px">This page builds a **real** transaction and asks the user's wallet to sign it. **Wallet approval required.**</div>
+      <h1 style="text-align:center;margin-bottom:8px">Softfund (STFD)</h1>
 
       <div class="hero" style="margin-bottom:12px">
-        <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreihhs2kunfn4dvwundezfqyksisjlqlrsqm77rypz6c7dmhwu3uy5y" alt="hero"/>
+        <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami" alt="hero"/>
       </div>
 
-      <div style="margin-bottom:8px">Price per STFD: <strong>$2.60</strong></div>
+      <div style="margin-bottom:8px">Price: <strong>$2.60</strong></div>
 
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
         <button class="btn" id="connectBtn">Connect Wallet</button>
@@ -53,39 +55,38 @@ body{font-family:Inter,system-ui,Arial;background:linear-gradient(135deg,#0f0f1a
       </div>
 
       <div style="margin-bottom:8px">
-        <div>Total USD: <span id="totalUSD">2.60</span></div>
+        <div>Total USD: <span id="totalUSD">2.600</span></div>
         <div>Total SOL: <span id="totalSOL">—</span> <span class="small" id="rate"></span></div>
       </div>
 
       <div style="margin:10px 0">
-        <button id="mintBtn" class="btn">Mint (Mainnet)</button>
+        <button id="mintBtn" class="btn">MINT</button>
       </div>
 
-      <div class="small" style="margin-top:8px">Recipients (50/50 split):</div>
+      <div style="margin-top:8px" class="small">Recipients:</div>
       <div style="margin-top:6px">
-        <div class="small">Recipient A: <span id="recipientA" class="addr">6v4DR5rkDFa3WdCQ35wvtfVYfk7i233Uiu6GmQ7JCdRu</span> <button class="btn" id="copyA" style="padding:6px 8px;margin-left:8px">Copy</button></div>
-        <div class="small" style="margin-top:6px">Recipient B: <span id="recipientB" class="addr">3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc</span> <button class="btn" id="copyB" style="padding:6px 8px;margin-left:8px">Copy</button></div>
-      </div>
-
-      <div style="margin-top:12px">
-        Webhook (optional, server endpoint to receive confirmed tx info):<br>
-        <input id="webhookUrl" placeholder="https://your-server.com/webhook" style="width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #223;background:#0b0b12;color:#eee">
+        <div class="small">A: <span id="recipientA" class="addr">6v4DR5rkDFa3WdCQ35wvtfVYfk7i233Uiu6GmQ7JCdRu</span><button class="copy-btn" id="copyA">Copy</button></div>
+        <div class="small" style="margin-top:6px">B: <span id="recipientB" class="addr">3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc</span><button class="copy-btn" id="copyB">Copy</button></div>
       </div>
 
       <div class="progress" style="margin-top:12px"><div id="progressBar" class="progress-bar"></div></div>
       <div id="counter" style="margin-top:8px" class="small"></div>
 
-      <div id="status" style="margin-top:8px" class="small"></div>
+      <div class="form-file" id="proofSection" style="display:none">
+        <input id="proofFile" type="file" class="input">
+        <input id="proofEmail" type="email" placeholder="Your email" class="input" style="margin-top:8px">
+        <button id="sendProof" class="btn" style="margin-top:8px">Send Proof</button>
+      </div>
     </div>
 
     <div class="right">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:800">Live Gallery (assigned metadata)</div>
+        <div style="font-weight:800">Recent mints</div>
         <div class="small">Cap: <strong id="cap">5000</strong></div>
       </div>
 
       <div id="soldOut" class="sold" style="display:none">SOLD OUT — 5000 MINTED</div>
-      <div class="small" style="margin-top:8px">Each successful transaction assigns metadata locally and shows it in the gallery.</div>
+      <div class="small" style="margin-top:8px">Assigned metadata shown below.</div>
 
       <div class="gallery" id="gallery" aria-live="polite" style="margin-top:12px"></div>
     </div>
@@ -97,19 +98,15 @@ body{font-family:Inter,system-ui,Arial;background:linear-gradient(135deg,#0f0f1a
 <script type="module">
 import { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from "https://cdn.jsdelivr.net/npm/@solana/web3.js@1.72.0/dist/web3.min.js";
 
-/* ---------- CONFIG ---------- */
-// RECIPIENTS you provided
 const RECIPIENT_A = "6v4DR5rkDFa3WdCQ35wvtfVYfk7i233Uiu6GmQ7JCdRu";
 const RECIPIENT_B = "3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc";
-
 const PRICE_USD = 2.60;
 const TOTAL_CAP = 5000;
-const START_MINTED = parseInt(localStorage.getItem('sf_minted_start')) || 532;
+const START_MINTED = parseInt(localStorage.getItem('sf_minted_start')||'532');
 let minted = parseInt(localStorage.getItem('sf_minted') || String(START_MINTED));
 let quantity = 1;
-let SOL_PRICE = 186.64; // fallback
+let SOL_PRICE = 186.64;
 
-// 20 metadata CIDs (use your real ones later if you like)
 const METADATA = [
   "bafkreihhs2kunfn4dvwundezfqyksisjlqlrsqm77rypz6c7dmhwu3uy5y",
   "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
@@ -130,12 +127,12 @@ const METADATA = [
   "bafkreifakecid0000000000000000000000000000000000000000008",
   "bafkreifakecid0000000000000000000000000000000000000000009",
   "bafkreifakecid0000000000000000000000000000000000000000010",
-  "bafkreifakecid0000000000000000000000000000000000000000011"
+  "bafkreifakecid0000000000000000000000000000000000000000011",
+  "bafkreifakecid0000000000000000000000000000000000000000012"
 ];
 
 const STORAGE = { records: 'sf_records', nextIdx: 'sf_nextidx', minted: 'sf_minted' };
 
-/* ---------- DOM refs ---------- */
 const connectBtn = document.getElementById('connectBtn');
 const connectedEl = document.getElementById('connected');
 const decBtn = document.getElementById('dec');
@@ -150,27 +147,25 @@ const counterEl = document.getElementById('counter');
 const galleryEl = document.getElementById('gallery');
 const heroImg = document.getElementById('heroImg');
 const soldOutEl = document.getElementById('soldOut');
+const proofSection = document.getElementById('proofSection');
+const copyA = document.getElementById('copyA');
+const copyB = document.getElementById('copyB');
 
 document.getElementById('recipientA').textContent = RECIPIENT_A;
 document.getElementById('recipientB').textContent = RECIPIENT_B;
 
-/* ---------- state ---------- */
 let provider = null;
 let records = JSON.parse(localStorage.getItem(STORAGE.records) || "[]");
 let nextIndex = parseInt(localStorage.getItem(STORAGE.nextIdx) || '0');
 
-/* ---------- RPC & connection ---------- */
-// DEFAULT: mainnet RPC. To test on devnet, **change** RPC below to "https://api.devnet.solana.com" before testing.
-const RPC = "https://api.mainnet-beta.solana.com"; // <-- MAINNET: real SOL. Change to devnet RPC for testing.
+const RPC = "https://api.mainnet-beta.solana.com";
 const connection = new Connection(RPC, 'confirmed');
 
-/* ---------- init ---------- */
 updateUI();
 fetchSOLPrice();
 renderGallery();
 tryAutoConnect();
 
-/* ---------- helpers ---------- */
 function updateUI(){
   quantityEl.textContent = quantity;
   counterEl.textContent = `${minted} people have minted`;
@@ -184,7 +179,7 @@ function updatePriceDisplay(){
   const totalSOL = (totalUSD / SOL_PRICE);
   totalUSDEl.textContent = totalUSD.toFixed(3);
   totalSOLEl.textContent = totalSOL.toFixed(6);
-  rateEl.textContent = `(1 SOL = $${SOL_PRICE.toFixed(2)})`;
+  rateEl && (rateEl.textContent = `(1 SOL = $${SOL_PRICE.toFixed(2)})`);
 }
 
 async function fetchSOLPrice(){
@@ -192,17 +187,34 @@ async function fetchSOLPrice(){
     const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
     const j = await r.json();
     if(j?.solana?.usd) SOL_PRICE = j.solana.usd;
-  }catch(e){ console.warn('price fetch failed', e) }
+  }catch(e){ }
   updatePriceDisplay();
 }
 
-decBtn?.addEventListener('click', ()=>{ quantity = Math.max(1, quantity-1); updateUI(); });
-incBtn?.addEventListener('click', ()=>{ quantity = quantity + 1; updateUI(); });
+decBtn.addEventListener('click', ()=>{ quantity = Math.max(1, quantity-1); updateUI(); });
+incBtn.addEventListener('click', ()=>{ quantity = quantity + 1; updateUI(); });
 
-document.getElementById('copyA').addEventListener('click', ()=>{ navigator.clipboard.writeText(RECIPIENT_A).then(()=>alert('Recipient A copied')) });
-document.getElementById('copyB').addEventListener('click', ()=>{ navigator.clipboard.writeText(RECIPIENT_B).then(()=>alert('Recipient B copied')) });
+copyA.addEventListener('click', ()=>{ navigator.clipboard.writeText(RECIPIENT_A).then(()=>alert('Copied')) });
+copyB.addEventListener('click', ()=>{ navigator.clipboard.writeText(RECIPIENT_B).then(()=>alert('Copied')) });
 
-/* gallery */
+connectBtn.addEventListener('click', async ()=>{
+  if(window.solana && window.solana.isPhantom){
+    try{ await window.solana.connect(); provider = window.solana; onWalletConnected(provider); }catch(e){}
+  } else if(window.backpack){
+    try{ await window.backpack.connect(); provider = window.backpack; onWalletConnected(provider); }catch(e){}
+  } else {
+    alert('Open in Phantom/Backpack to send SOL');
+  }
+});
+
+function onWalletConnected(p){ provider = p; connectedEl.textContent = 'Connected: ' + (provider.publicKey?.toString?.()||''); }
+
+async function tryAutoConnect(){
+  if(window.solana && window.solana.isPhantom){
+    try{ await window.solana.connect({ onlyIfTrusted:true }); provider = window.solana; onWalletConnected(provider); }catch(e){}
+  }
+}
+
 function renderGallery(){
   galleryEl.innerHTML = '';
   const show = records.slice(-30).reverse();
@@ -216,7 +228,6 @@ function renderGallery(){
   }
 }
 
-/* confetti */
 function fireConfetti(){
   const canvas = document.getElementById('confettiCanvas');
   const ctx = canvas.getContext('2d');
@@ -229,66 +240,32 @@ function fireConfetti(){
   setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,canvas.width,canvas.height); },3500);
 }
 
-/* auto-connect if trusted */
-async function tryAutoConnect(){
-  if(window.solana && window.solana.isPhantom){
-    try{ await window.solana.connect({ onlyIfTrusted: true }); onWalletConnected(window.solana); }catch(e){}
-  }
-}
-
-/* wallet connection UI only (we do not ever request secrets) */
-connectBtn.addEventListener('click', async ()=>{
-  if(window.solana && window.solana.isPhantom){
-    try{ await window.solana.connect(); onWalletConnected(window.solana); }catch(e){ console.log('connect cancelled', e); }
-  } else if(window.backpack){
-    try{ await window.backpack.connect(); onWalletConnected(window.backpack); }catch(e){}
-  } else {
-    alert('No Solana wallet detected. Open this page inside Phantom or Backpack (desktop/mobile) to sign transactions.');
-  }
-});
-
-function onWalletConnected(p){
-  provider = p;
-  connectedEl.textContent = 'Connected: ' + (provider.publicKey?.toString?.() || provider._publicKey?.toString?.() || '');
-}
-
-/* main mint handler: builds a tx that splits the transfer 50/50 between RECIPIENT_A and RECIPIENT_B,
-   asks the user's wallet to sign and send it, then waits for confirmation. On success we assign metadata locally. */
 mintBtn.addEventListener('click', async ()=>{
-  if(minted >= TOTAL_CAP){ alert('Sold out'); return; }
-  const webhook = (document.getElementById('webhookUrl').value || '').trim();
+  if(minted >= TOTAL_CAP) return;
   const totalUSD = PRICE_USD * quantity;
   const totalSOL = totalUSD / SOL_PRICE;
   const lamportsTotal = Math.round(totalSOL * LAMPORTS_PER_SOL);
-
-  // split 50/50 (floor division)
-  const lamportsA = Math.floor(lamportsTotal / 2) + (lamportsTotal % 2); // remainder to A
+  const lamportsA = Math.floor(lamportsTotal / 2) + (lamportsTotal % 2);
   const lamportsB = lamportsTotal - lamportsA;
 
   if(provider && provider.publicKey){
-    if(!confirm(`You will send about ${totalSOL.toFixed(6)} SOL (~$${totalUSD.toFixed(3)}) from your wallet to two recipients. Approve in your wallet to complete.`)) return;
-    mintBtn.disabled = true; mintBtn.textContent = 'Waiting for wallet...';
+    if(!confirm(`Send ${totalSOL.toFixed(6)} SOL?`)) return;
+    mintBtn.disabled = true; mintBtn.textContent = 'Waiting...';
     try{
       const fromPubkey = provider.publicKey;
       const toA = new PublicKey(RECIPIENT_A);
       const toB = new PublicKey(RECIPIENT_B);
-
-      // Create a transaction with two transfer instructions
       const tx = new Transaction().add(
         SystemProgram.transfer({ fromPubkey, toPubkey: toA, lamports: lamportsA }),
         SystemProgram.transfer({ fromPubkey, toPubkey: toB, lamports: lamportsB })
       );
       tx.feePayer = fromPubkey;
       tx.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-
-      // Ask wallet to sign transaction
-      // Many wallets support provider.signTransaction(tx)
       const signed = await provider.signTransaction(tx);
       const raw = signed.serialize();
       const sig = await connection.sendRawTransaction(raw);
       await connection.confirmTransaction(sig, 'confirmed');
 
-      // On success: assign metadata items locally and update UI
       const recs = JSON.parse(localStorage.getItem(STORAGE.records) || "[]");
       const assigned = [];
       for(let i=0;i<quantity;i++){
@@ -304,28 +281,18 @@ mintBtn.addEventListener('click', async ()=>{
       localStorage.setItem(STORAGE.nextIdx, String(nextIndex));
       localStorage.setItem(STORAGE.minted, String(minted));
       renderGallery(); updateUI();
-      document.getElementById('status').textContent = 'Transaction confirmed: ' + sig;
+      document.getElementById('status').textContent = 'Confirmed: ' + sig;
       fireConfetti();
-      // reveal last assigned item in hero
-      const last = assigned[assigned.length - 1];
-      if(last) { heroImg.style.opacity = 0.25; setTimeout(()=>{ heroImg.src = `https://gateway.lighthouse.storage/ipfs/${last.cid}`; heroImg.style.opacity = 1; }, 350); }
-
-      // Post to webhook for server-side verification (optional)
-      if(webhook){
-        try{
-          await fetch(webhook, { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ sig, to: [RECIPIENT_A, RECIPIENT_B], amountSOL: totalSOL, amountUSD: totalUSD, qty: quantity, from: provider.publicKey.toString() }) });
-        }catch(e){ console.warn('Webhook post failed', e); }
-      }
+      if(assigned.length){ heroImg.style.opacity = 0.25; setTimeout(()=>{ heroImg.src = `https://gateway.lighthouse.storage/ipfs/${assigned[assigned.length-1].cid}`; heroImg.style.opacity = 1; },350); }
+      proofSection.style.display = 'block';
     }catch(err){
-      console.error(err);
-      alert('Transaction failed or cancelled: ' + (err?.message || err));
+      alert('Failed: ' + (err?.message||err));
     }finally{
-      mintBtn.disabled = false; mintBtn.textContent = 'Mint (Mainnet)';
+      mintBtn.disabled = false; mintBtn.textContent = 'MINT';
       updateUI();
     }
   } else {
-    // No connected wallet: fall back to manual instructions & simulated assignment
-    if(!confirm(`No wallet detected. You can send ${totalSOL.toFixed(6)} SOL manually to either recipient, or proceed with a simulated mint now.`)) return;
+    if(!confirm(`No wallet. Simulate mint and show manual send instructions?`)) return;
     const recs = JSON.parse(localStorage.getItem(STORAGE.records) || "[]");
     const assigned = [];
     for(let i=0;i<quantity;i++){
@@ -341,22 +308,13 @@ mintBtn.addEventListener('click', async ()=>{
     localStorage.setItem(STORAGE.nextIdx, String(nextIndex));
     localStorage.setItem(STORAGE.minted, String(minted));
     renderGallery(); updateUI();
-    document.getElementById('status').textContent = `Simulated assign: ${assigned.length} token(s)`;
+    document.getElementById('status').textContent = 'Simulated assign';
     fireConfetti();
+    proofSection.style.display = 'block';
   }
 });
 
-/* persist & helpers */
-function persist(){ localStorage.setItem(STORAGE.records, JSON.stringify(records)); localStorage.setItem(STORAGE.nextIdx, String(nextIndex)); localStorage.setItem(STORAGE.minted, String(minted)); }
-function tryAutoConnect(){ if(window.solana && window.solana.isPhantom){ try{ window.solana.connect({ onlyIfTrusted: true }).then(()=>onWalletConnected(window.solana)).catch(()=>{}); }catch(e){} } }
-function onWalletConnected(p){ provider = p; connectedEl.textContent = 'Connected: ' + (provider.publicKey?.toString?.()||''); }
-
-/* initial UI */
-updateUI();
-renderGallery();
-
-/* optional convenience: press "c" to try connect */
-window.addEventListener('keydown', (e)=>{ if(e.key==='c') connectBtn.click(); });
+document.getElementById('sendProof').addEventListener('click', ()=>{ const f=document.getElementById('proofFile').files[0]; const e=document.getElementById('proofEmail').value; if(!f||!e) return alert('file & email'); alert('Proof recorded (demo)'); proofSection.style.display='none'; });
 
 </script>
 </body>
