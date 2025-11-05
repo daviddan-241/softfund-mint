@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Softfund NFT Mint</title>
 
-<!-- Fonts & Styles -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-  body {
+body {
     margin:0;
     font-family: 'Montserrat', sans-serif;
     background-color: #121212;
@@ -18,28 +17,28 @@
     justify-content:center;
     align-items:center;
     min-height:100vh;
-  }
+}
 
-  .container {
+.container {
     background-color:#1a1a1a;
     padding:30px;
     border-radius:15px;
     box-shadow:0 0 30px rgba(0,0,0,0.5);
     width:360px;
     text-align:center;
-  }
+}
 
-  h1 { color:#00FFAA; margin-bottom:15px; }
-  p { margin-bottom:15px; }
+h1 { color:#00FFAA; margin-bottom:15px; }
+p { margin-bottom:15px; }
 
-  .hero-image {
+.hero-image {
     width:100%;
     border-radius:12px;
     margin-bottom:20px;
     border:2px solid #00FFAA;
-  }
+}
 
-  button {
+button {
     padding:10px 20px;
     margin:10px;
     cursor:pointer;
@@ -47,15 +46,15 @@
     border-radius:8px;
     font-weight:bold;
     transition: all 0.2s;
-  }
+}
 
-  #connectBtn { background:#FF6F61; color:white; }
-  #connectBtn:hover { background:#FF5A4D; }
+#connectBtn { background:#FF6F61; color:white; }
+#connectBtn:hover { background:#FF5A4D; }
 
-  #mintBtn { background:#00FFAA; color:#121212; }
-  #mintBtn:hover { background:#00CC88; }
+#mintBtn { background:#00FFAA; color:#121212; }
+#mintBtn:hover { background:#00CC88; }
 
-  input {
+input {
     width:60px;
     padding:8px;
     margin-right:10px;
@@ -64,34 +63,30 @@
     text-align:center;
     background:#1a1a1a;
     color:#EAEAEA;
-  }
+}
 
-  #status {
-    margin-bottom:15px;
-    font-weight:bold;
-    color:#FF6F61;
-  }
+#status { margin-bottom:15px; font-weight:bold; color:#FF6F61; }
 
-  #metadataList {
+#metadataList {
     text-align:left;
-    max-height:150px;
+    max-height:200px;
     overflow-y:auto;
     margin-top:15px;
     font-size:0.9em;
-  }
+}
 
-  #metadataList li {
+#metadataList li {
     border-bottom:1px solid #00FFAA;
     padding:5px 0;
-  }
+}
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Softfund NFT Collection</h1>
-  <img src="hero-nft.jpg" alt="Hero NFT" class="hero-image">
-  <p id="status">Connect your wallet to start minting</p>
+  <h1>Softfund Exclusive NFT Drop</h1>
+  <img src="https://gateway.lighthouse.storage/ipfs/bafkreihhs2kunfn4dvwundezfqyksisjlqlrsqm77rypz6c7dmhwu3uy5y" alt="Softfund #1" class="hero-image">
+  <p id="status">Connect your wallet to mint your Softfund NFT!</p>
 
   <div id="walletButtons"></div>
 
@@ -100,7 +95,7 @@
     <label>Quantity:</label>
     <input type="number" id="quantity" value="1" min="1" max="25">
     <button id="mintBtn">Mint NFT ($2.672 each)</button>
-    
+
     <ul id="metadataList"></ul>
   </div>
 </div>
@@ -108,18 +103,18 @@
 <script type="module">
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "https://cdn.jsdelivr.net/npm/@solana/web3.js@1.72.0/dist/web3.min.js";
 
-// === CONFIG ===
+// CONFIG
 const CONFIG = {
     TREASURY_WALLET: "6v4DR5rkDFa3WdCQ35wvtfVYfk7i233Uiu6GmQ7JCdRu",
     PRICE_USD: 2.672,
     MAX_SUPPLY: 25,
     METADATA_CIDS: [
-        "bafkreid7v5q6uetszdev5tmlrf2ma43tjfbova7gc7epuzt2lnbhcc4ijm",
-        "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
+        "bafkreihhs2kunfn4dvwundezfqyksisjlqlrsqm77rypz6c7dmhwu3uy5y",
         "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami",
         "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
         "bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le",
-        // Add up to 25 metadata CIDs here
+        "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra"
+        // Add up to 25 total CIDs here
     ]
 };
 
@@ -139,7 +134,7 @@ CONFIG.METADATA_CIDS.forEach((cid, idx) => {
     metadataList.appendChild(li);
 });
 
-// === WALLET CONNECT ===
+// WALLET CONNECT
 async function connectWallet() {
     if (!window.solana) {
         alert("Please install a Solana wallet (Phantom / Solflare / Trust Wallet)");
@@ -148,14 +143,13 @@ async function connectWallet() {
     try {
         const resp = await window.solana.connect();
         walletAddressSpan.textContent = resp.publicKey.toString();
-        statusEl.textContent = "Wallet connected!";
+        statusEl.textContent = "Wallet connected! Ready to mint.";
         mintSection.style.display = "block";
     } catch (err) {
         statusEl.textContent = "Wallet connection failed.";
     }
 }
 
-// Connect button
 const walletButtonsDiv = document.getElementById("walletButtons");
 const connectBtn = document.createElement("button");
 connectBtn.id = "connectBtn";
@@ -163,7 +157,7 @@ connectBtn.innerText = "Connect Wallet";
 connectBtn.onclick = connectWallet;
 walletButtonsDiv.appendChild(connectBtn);
 
-// === MINT LOGIC ===
+// MINT LOGIC
 mintBtn.onclick = async () => {
     const qty = parseInt(quantityInput.value);
     if (totalMinted + qty > CONFIG.MAX_SUPPLY) {
@@ -171,8 +165,8 @@ mintBtn.onclick = async () => {
         return;
     }
 
-    // Approx USD → SOL (dynamic pricing possible with API)
-    const solAmount = (CONFIG.PRICE_USD * qty) / 30; 
+    // Approx USD → SOL (adjust as needed)
+    const solAmount = (CONFIG.PRICE_USD * qty) / 30;
 
     const tx = new Transaction().add(
         SystemProgram.transfer({
