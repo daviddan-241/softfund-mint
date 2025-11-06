@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Softfund (STFD) — Mint (Updated Wallet Flow)</title>
+<title>Softfund (STFD) — Mint (Fixed)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg:#0f0f1a;--card:#121226;--accent:#00d4ff;--text:#e6eefc;--muted:#9fb0c8}
@@ -14,7 +14,7 @@ body{font-family:Inter,system-ui,Arial;background:linear-gradient(135deg,#0f0f1a
 .row{display:flex;gap:20px;flex-wrap:wrap}
 .left{flex:0 0 360px}.right{flex:1}
 h1{text-align:center;margin-bottom:8px;font-weight:700}
-.hero img{width:100%;border-radius:10px;display:block}
+.hero img{width:100%;border-radius:10px;display:block;object-fit:cover}
 .controls{margin-top:12px}
 .btn{background:linear-gradient(90deg,#00d4ff,#00ffa0);border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;color:#000}
 .small{font-size:0.9rem;color:var(--muted)}
@@ -44,7 +44,7 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
   <div class="row">
     <div class="left">
       <div class="hero">
-        <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
+        <img id="heroImg" src="https://ipfs.io/ipfs/bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra" alt="hero image">
       </div><div class="controls">
     <div class="small">Price per STFD: <strong>$3.20</strong></div>
 
@@ -97,18 +97,10 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
   <div class="wallet-modal-content">
     <div class="wallet-option" data-wallet="phantom">Open Phantom (recommended)</div>
     <div class="wallet-option" data-wallet="solflare">Open Solflare</div>
-    <div class="wallet-option" data-wallet="trust">Open Trust Wallet</div>
+    <div class="wallet-option" data-wallet="trust">Open Trust Wallet (Android only)</div>
     <div class="wallet-option" data-wallet="cancel">Cancel</div>
   </div>
 </div><script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script><script>
-/*
-  Updated wallet connection logic:
-  - Detects injected providers (Phantom, Solflare, etc.) and connects
-  - If no injected provider, presents modal with deep-link options for mobile wallets
-  - Uses provider.signAndSendTransaction when available (Phantom modern API), otherwise falls back to signTransaction + sendRawTransaction
-  - After successful connect, the mint flow will request approval and send SOL to treasury
-*/
-
 document.addEventListener('DOMContentLoaded', () => {
   const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3;
   const TREASURY = '3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc';
@@ -120,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const METADATA = ["bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le"];
   const STORAGE = { records:'sf_records', nextIdx:'sf_nextidx', minted:'sf_minted' };
 
-  // UI elements
   const decBtn=document.getElementById('dec');
   const incBtn=document.getElementById('inc');
   const quantityEl=document.getElementById('quantity');
@@ -140,68 +131,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const walletOptions=document.querySelectorAll('.wallet-option');
 
   const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
-  let provider = null; // generic provider object
+  let provider = null;
   let records = JSON.parse(localStorage.getItem(STORAGE.records)||"[]");
   let nextIndex = parseInt(localStorage.getItem(STORAGE.nextIdx)||'0');
 
-  // helpers
-  function detectInjectedProvider(){
-    // Phantom
-    if(window.solana && window.solana.isPhantom) return window.solana;
-    // Solflare (modern exposes window.solflare)
-    if(window.solflare && window.solflare.isSolflare) return window.solflare;
-    // Many wallets inject under window.solana with different flags; check common ones
-    if(window.solana && (window.solana.isPhantom || window.solana.isSolflare || window.solana.isTrust)) return window.solana;
-    return null;
-  }
-
-  function openDeepLinkFor(wallet){
-    // Deep link URIs — best-effort. These are commonly supported patterns for mobile wallets.
-    const appUrl = encodeURIComponent(location.href);
-    if(wallet==='phantom'){
-      // Phantom universal link: will open app if installed and initiate connect
-      window.location.href = `https://phantom.app/ul/v1/connect?app_url=${appUrl}`;
-    } else if(wallet==='solflare'){
-      window.location.href = `https://solflare.com/access-wallet?ref=${appUrl}`; // fallback web link
-    } else if(wallet==='trust'){
-      // Trust Wallet on mobile: attempt solana: URI scheme
-      window.location.href = `solana:connect?app_url=${appUrl}`;
-    }
-  }
-
-  async function waitForInjectedProvider(timeoutMs = 8000){
-    const start = Date.now();
-    while(Date.now() - start < timeoutMs){
-      const p = detectInjectedProvider();
-      if(p) return p;
-      // small delay
-      await new Promise(r=>setTimeout(r, 300));
-    }
-    return null;
-  }
-
-  // UI events
   decBtn.addEventListener('click',()=>{ quantity=Math.max(1,quantity-1); updateUI(); });
   incBtn.addEventListener('click',()=>{ quantity=Math.min(10,quantity+1); updateUI(); });
   copyTreasury.addEventListener('click',()=>{ navigator.clipboard.writeText(TREASURY).then(()=>alert('Copied treasury')); });
 
-  connectBtn.addEventListener('click', async ()=>{
-    statusEl.textContent='Detecting wallet...';
-    const injected = detectInjectedProvider();
-    if(injected){
-      try{
-        await injected.connect();
-        provider = injected;
-        statusEl.textContent = `Connected: ${provider.publicKey?.toString?.() || 'unknown'}`;
-        connectBtn.textContent = 'Wallet connected';
-      }catch(e){
-        console.warn('connect failed',e);
-        statusEl.textContent='Connect failed';
-      }
-      return;
-    }
+  function isAndroid(){return /Android/i.test(navigator.userAgent);}
 
-    // No injected provider — show modal with deep-link options
+  connectBtn.addEventListener('click', async ()=>{
+    if(window.solana){
+      try{await window.solana.connect(); provider=window.solana; statusEl.textContent=`Connected: ${provider.publicKey}`; return;}catch(e){statusEl.textContent='Connect failed';}
+    }
     walletModal.style.display='flex';
   });
 
@@ -209,136 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     opt.addEventListener('click', async ()=>{
       const wallet = opt.dataset.wallet;
       walletModal.style.display='none';
-      if(wallet==='cancel'){
-        statusEl.textContent='Connect canceled';
-        return;
-      }
-
-      // Attempt to open deep link and then wait for an injected provider to appear (mobile wallets often inject after open)
-      openDeepLinkFor(wallet);
-      statusEl.textContent=`Opening ${wallet}... waiting for provider to appear`;
-      const p = await waitForInjectedProvider(10000);
-      if(p){
-        try{ await p.connect(); provider = p; statusEl.textContent = `Connected: ${provider.publicKey?.toString?.() || 'unknown'}`; connectBtn.textContent = 'Wallet connected'; }
-        catch(e){ console.warn('post-deeplink connect failed',e); statusEl.textContent='Provider found but connect failed'; }
-      } else {
-        statusEl.textContent = `No injected provider detected after opening ${wallet}. You may need to install the wallet or use the wallet's in-app browser.`;
-      }
-    });
-  });
-
-  // Mint button triggers mint flow — requires provider
-  mintBtn.addEventListener('click', async ()=>{
-    if(!provider || !provider.publicKey){
-      alert('Please connect a Sol wallet first');
-      return;
-    }
-    await startMint();
-  });
-
-  async function startMint(){
-    if(minted>=TOTAL_CAP){ alert('Sold out'); return; }
-    const totalUSD = PRICE_USD*quantity;
-    const totalSOL = totalUSD/SOL_PRICE;
-    const lamports = Math.round(totalSOL*LAMPORTS_PER_SOL);
-
-    if(!confirm(`Send ${totalSOL.toFixed(6)} SOL to treasury? Approve in wallet.`)) return;
-    mintBtn.disabled=true; mintBtn.textContent='Waiting for approval...'; statusEl.textContent='';
-
-    try{
-      const fromPubkey = provider.publicKey;
-      const toPubkey = new PublicKey(TREASURY);
-      const tx = new Transaction().add(SystemProgram.transfer({fromPubkey,toPubkey,lamports}));
-      tx.feePayer = fromPubkey;
-      const { blockhash } = await connection.getRecentBlockhash('confirmed');
-      tx.recentBlockhash = blockhash;
-
-      // Modern Phantom has signAndSendTransaction API
-      if(typeof provider.signAndSendTransaction === 'function'){
-        // Some providers expect a Transaction object and return a signature
-        const signedTxResponse = await provider.signAndSendTransaction(tx);
-        const sig = signedTxResponse?.signature || signedTxResponse;
-        // confirm
-        await connection.confirmTransaction(sig, 'confirmed');
-        await postMintSuccess(sig);
-      } else if(typeof provider.signTransaction === 'function'){
-        // signTransaction -> serialize -> sendRawTransaction
-        const signed = await provider.signTransaction(tx);
-        const raw = signed.serialize();
-        const sig = await connection.sendRawTransaction(raw);
-        await connection.confirmTransaction(sig, 'confirmed');
-        await postMintSuccess(sig);
-      } else if(typeof provider.sign === 'function'){
-        // older Wallets provide sign method
-        const signed = await provider.sign(tx);
-        const raw = signed.serialize();
-        const sig = await connection.sendRawTransaction(raw);
-        await connection.confirmTransaction(sig, 'confirmed');
-        await postMintSuccess(sig);
-      } else {
-        throw new Error('Connected wallet does not support signing transactions via this page. Try Phantom or Solflare in a supported browser.');
-      }
-
-    } catch(e){ console.error(e); alert('Transaction failed: '+(e.message||e)); }
-    finally { mintBtn.disabled=false; mintBtn.textContent='MINT'; updateUI(); }
-  }
-
-  async function postMintSuccess(sig){
-    const recs = JSON.parse(localStorage.getItem(STORAGE.records)||"[]");
-    const assigned=[];
-    for(let i=0;i<quantity;i++){
-      if(minted>=TOTAL_CAP) break;
-      const cid = METADATA[nextIndex % METADATA.length];
-      const id = recs.length+1;
-      recs.push({id,cid,tx:sig,ts:Date.now()});
-      assigned.push({id,cid});
-      nextIndex=(nextIndex+1)%METADATA.length;
-      minted++;
-    }
-    localStorage.setItem(STORAGE.records,JSON.stringify(recs));
-    localStorage.setItem(STORAGE.nextIdx,String(nextIndex));
-    localStorage.setItem(STORAGE.minted,String(minted));
-    records=recs;
-    renderGallery(); updateUI();
-    statusEl.textContent='Confirmed — tx: '+sig;
-    fireConfetti();
-    if(assigned.length){ heroImg.style.opacity=0.3; setTimeout(()=>{ heroImg.src=`https://gateway.lighthouse.storage/ipfs/${assigned[assigned.length-1].cid}`; heroImg.style.opacity=1; },350); }
-  }
-
-  function updateUI(){
-    quantityEl.textContent=quantity;
-    const totalUSD = PRICE_USD*quantity;
-    const totalSOL = totalUSD/SOL_PRICE;
-    totalUSDEl.textContent=totalUSD.toFixed(3);
-    totalSOLEl.textContent=totalSOL.toFixed(6);
-    rateEl.textContent=`(1 SOL = $${SOL_PRICE.toFixed(2)})`;
-    counterEl.textContent=`${minted} people have minted`;
-    progressBar.style.width=Math.min(100,(minted/TOTAL_CAP)*100)+'%';
-    soldOutEl.style.display = minted>=TOTAL_CAP?'block':'none';
-  }
-
-  function renderGallery(){
-    galleryEl.innerHTML='';
-    const show = records.slice(-30).reverse();
-    if(show.length===0){ galleryEl.innerHTML='<div class="small" style="color:#9fb0c8">No mints yet</div>'; return; }
-    for(const r of show){
-      const tile=document.createElement('div'); tile.className='tile';
-      const img=document.createElement('img'); img.src=`https://gateway.lighthouse.storage/ipfs/${r.cid}`; img.alt=`#${r.id}`;
-      const label=document.createElement('div'); label.textContent=`#${r.id}`; label.style.marginTop='6px'; label.style.fontWeight='700';
-      tile.appendChild(img); tile.appendChild(label);
-      galleryEl.appendChild(tile);
-    }
-  }
-
-  function fireConfetti(){
-    const canvas=document.getElementById('confettiCanvas'); const ctx=canvas.getContext('2d'); canvas.width=innerWidth; canvas.height=innerHeight;
-    const parts=[]; for(let i=0;i<120;i++) parts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.2,dx:(Math.random()-0.5)*6,dy:Math.random()*6+2,s:Math.random()*6+3,color:`hsl(${Math.random()*360},80%,60%)`});
-    let raf; function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of parts){ ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.s,p.s); p.x+=p.dx; p.y+=p.dy; if(p.y>canvas.height) p.y=-10; } raf=requestAnimationFrame(loop); } loop();
-    setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,canvas.width,canvas.height); },3500);
-  }
-
-  (async function fetchSOLPrice(){ try{ const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'); const j=await r.json(); if(j?.solana?.usd) SOL_PRICE=j.solana.usd; } catch(e){console.warn('price fetch failed',e);} updateUI(); })();
-  updateUI(); renderGallery();
-});
-</script></body>
-</html>
+      if(wallet==='cancel'){ statusEl.textContent='Connect canceled'; return; }
+      if(wallet==='trust' && !isAndroid()){ alert('Trust Wallet is Android only'); return; }
+      const appUrl = encodeURIComponent(location.href);
+      if(wallet==='phantom
