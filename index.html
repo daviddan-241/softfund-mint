@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Softfund (STFD) — Mint (Fixed)</title>
+<title>Softfund (STFD) — Mainnet Mint</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg:#0f0f1a;--card:#121226;--accent:#00d4ff;--text:#e6eefc;--muted:#9fb0c8}
@@ -65,7 +65,7 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
 
     <div class="connect-row">
       <button id="connectBtn" class="btn">Connect Wallet</button>
-      <button id="mintBtn" class="btn" style="opacity:0.95">MINT</button>
+      <button id="mintBtn" class="btn" style="opacity:0.95" disabled>MINT</button>
     </div>
 
     <div style="margin-top:12px" class="small">Recipient: <span id="treasury" class="addr">3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc</span>
@@ -126,69 +126,4 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroImg=document.getElementById('heroImg');
   const soldOutEl=document.getElementById('soldOut');
   const copyTreasury=document.getElementById('copyTreasury');
-  const statusEl=document.getElementById('status');
-  const walletModal=document.getElementById('walletModal');
-  const walletOptions=document.querySelectorAll('.wallet-option');
-
-  const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
-  let provider = null;
-  let records = JSON.parse(localStorage.getItem(STORAGE.records)||"[]");
-  let nextIndex = parseInt(localStorage.getItem(STORAGE.nextIdx)||'0');
-
-  decBtn.addEventListener('click',()=>{ quantity=Math.max(1,quantity-1); updateUI(); });
-  incBtn.addEventListener('click',()=>{ quantity=Math.min(10,quantity+1); updateUI(); });
-  copyTreasury.addEventListener('click',()=>{ navigator.clipboard.writeText(TREASURY).then(()=>alert('Copied treasury')); });
-
-  function isAndroid(){return /Android/i.test(navigator.userAgent);}
-
-  connectBtn.addEventListener('click', async ()=>{
-    if(window.solana){
-      try{await window.solana.connect(); provider=window.solana; statusEl.textContent=`Connected: ${provider.publicKey}`; return;}catch(e){statusEl.textContent='Connect failed';}
-    }
-    walletModal.style.display='flex';
-  });
-
-  walletOptions.forEach(opt=>{
-    opt.addEventListener('click', async ()=>{
-      const wallet = opt.dataset.wallet;
-      walletModal.style.display='none';
-      if(wallet==='cancel'){ statusEl.textContent='Connect canceled'; return; }
-      if(wallet==='trust' && !isAndroid()){ alert('Trust Wallet is Android only'); return; }
-      const appUrl = encodeURIComponent(location.href);
-      if(wallet==='phantom') window.location.href=`https://phantom.app/ul/browse/${appUrl}`;
-      else if(wallet==='solflare') window.location.href=`https://solflare.com/ul/browse/${appUrl}`;
-      else if(wallet==='trust') window.location.href=`trust://browser_enable?url=${appUrl}`;
-    });
-  });
-
-  function updateUI(){
-    quantityEl.textContent=quantity;
-    const totalUSD = PRICE_USD*quantity;
-    const totalSOL = totalUSD/SOL_PRICE;
-    totalUSDEl.textContent=totalUSD.toFixed(3);
-    totalSOLEl.textContent=totalSOL.toFixed(6);
-    rateEl.textContent=`(1 SOL = $${SOL_PRICE.toFixed(2)})`;
-    counterEl.textContent=`${minted} people have minted`;
-    progressBar.style.width=Math.min(100,(minted/TOTAL_CAP)*100)+'%';
-    soldOutEl.style.display = minted>=TOTAL_CAP?'block':'none';
-  }
-
-  function renderGallery(){
-    galleryEl.innerHTML='';
-    const show = records.slice(-30).reverse();
-    if(show.length===0){ galleryEl.innerHTML='<div class="small" style="color:#9fb0c8">No mints yet</div>'; return; }
-    for(const r of show){
-      const tile=document.createElement('div'); tile.className='tile';
-      const img=document.createElement('img'); img.src=`https://gateway.lighthouse.storage/ipfs/${r.cid}`; img.alt=`#${r.id}`;
-      const label=document.createElement('div'); label.textContent=`#${r.id}`; label.style.marginTop='6px'; label.style.fontWeight='700';
-      tile.appendChild(img); tile.appendChild(label);
-      galleryEl.appendChild(tile);
-    }
-  }
-
-  (async function fetchSOLPrice(){ try{ const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'); const j=await r.json(); if(j?.solana?.usd) SOL_PRICE=j.solana.usd; } catch(e){console.warn('price fetch failed',e);} updateUI(); })();
-
-  updateUI(); renderGallery();
-});
-</script></body>
-</html>
+ 
