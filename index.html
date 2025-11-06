@@ -1,22 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Softfund (STFD)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0f0f1a;--card:#121226;--accent:#00d4ff;--text:#e6eefc;--muted:#9fb0c8}
-*{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Inter,system-ui,Arial;background:linear-gradient(135deg,#0f0f1a,#0b1230);color:var(--text);padding:18px;min-height:100vh}
 .container{max-width:920px;margin:20px auto;background:var(--card);border-radius:14px;padding:18px;border:1px solid rgba(0,212,255,0.06);box-shadow:0 12px 30px rgba(0,0,0,0.5)}
-.row{display:flex;gap:20px;flex-wrap:wrap}
-.left{flex:0 0 360px}.right{flex:1}
 h1{text-align:center;margin-bottom:8px;font-weight:700}
-.hero img{width:100%;border-radius:10px;display:block}
-.controls{margin-top:12px}
-.btn{background:linear-gradient(90deg,#00d4ff,#00ffa0);border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;color:#000}
-.small{font-size:0.9rem;color:var(--muted)}
+.btn{background:linear-gradient(90deg,#00d4ff,#00ffa0);border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;color:#000;margin:5px 0}
+#walletSelect{margin-top:8px;padding:6px;border-radius:8px;width:100%}
+.hero img{width:100%;border-radius:10px;display:block;margin-top:10px}
+.small{font-size:0.9rem;color:#9fb0c8;margin-top:5px}
 .addr{font-family:monospace;color:#7ff}
 .qty-btn{width:44px;height:44px;border-radius:10px;border:1px solid rgba(0,212,255,0.08);background:rgba(0,212,255,0.02);color:var(--accent);font-size:20px;cursor:pointer}
 #quantity{display:inline-block;width:48px;text-align:center;font-weight:800;color:#fff}
@@ -36,75 +33,93 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
 <body>
 <div class="container">
   <h1>Softfund (STFD)</h1>
-  <div class="row">
-    <div class="left">
-      <div class="hero">
-        <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
-      </div>
-      <div class="controls">
-        <div class="small">Price per STFD: <strong>$3.20</strong></div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
-          <button class="btn" id="connectBtn">Connect Wallet</button>
-          <div id="connected" class="small">Not connected</div>
-        </div>
-        <div style="margin-top:12px">
-          <div class="small">Quantity</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-            <button class="qty-btn" id="dec">−</button>
-            <div id="quantity">1</div>
-            <button class="qty-btn" id="inc">+</button>
-            <div style="margin-left:12px" class="small">max 10</div>
-          </div>
-        </div>
-        <div style="margin-top:12px" class="small">
-          Total: $<span id="totalUSD">3.200</span> USD ≈ <span id="totalSOL">—</span> SOL
-          <div id="rate" class="small" style="margin-top:6px"></div>
-        </div>
-        <div style="margin-top:12px">
-          <button id="mintBtn" class="btn">MINT</button>
-        </div>
-        <div style="margin-top:12px" class="small">Recipient: <span id="treasury" class="addr">3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc</span>
-          <button class="copy-btn" id="copyTreasury">Copy</button>
-        </div>
-        <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
-        <div id="counter" class="small" style="margin-top:8px"></div>
-        <div id="proofSection" style="display:none;margin-top:12px">
-          <input id="proofFile" type="file" class="input">
-          <input id="proofEmail" type="email" class="input" placeholder="Your email">
-          <button id="sendProof" class="btn" style="margin-top:8px">Send Proof</button>
-        </div>
-        <div id="status" class="status"></div>
-        <div class="note">Open this page inside any Solana wallet or on HTTPS for desktop wallet extensions.</div>
-      </div>
-    </div>
-    <div class="right">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:800">Recent mints</div>
-        <div class="small">Cap: <strong id="cap">5000</strong></div>
-      </div>
-      <div id="soldOut" class="sold" style="display:none">SOLD OUT — 5000 MINTED</div>
-      <div class="gallery" id="gallery" aria-live="polite"></div>
+
+  <div>
+    <label class="small">Select Wallet:</label>
+    <select id="walletSelect">
+      <option value="">Choose Wallet</option>
+      <option value="phantom">Phantom</option>
+      <option value="solflare">Solflare</option>
+      <option value="backpack">Backpack</option>
+      <option value="sollet">Sollet</option>
+      <option value="trust">Trust Wallet</option>
+    </select>
+    <button class="btn" id="connectBtn">Connect Wallet</button>
+    <div id="connected" class="small">Not connected</div>
+  </div>
+
+  <div class="hero">
+    <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="Hero Image">
+  </div>
+
+  <div style="margin-top:12px">
+    <div class="small">Quantity</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+      <button class="qty-btn" id="dec">−</button>
+      <div id="quantity">1</div>
+      <button class="qty-btn" id="inc">+</button>
+      <div style="margin-left:12px" class="small">max 10</div>
     </div>
   </div>
+
+  <div style="margin-top:12px" class="small">
+    Total: $<span id="totalUSD">3.20</span> USD ≈ <span id="totalSOL">—</span> SOL
+    <div id="rate" class="small" style="margin-top:6px"></div>
+  </div>
+
+  <div style="margin-top:12px">
+    <button id="mintBtn" class="btn">MINT</button>
+  </div>
+
+  <div style="margin-top:12px" class="small">
+    Recipient: <span id="treasury" class="addr">3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc</span>
+    <button class="copy-btn" id="copyTreasury">Copy</button>
+  </div>
+
+  <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+  <div id="counter" class="small" style="margin-top:8px"></div>
+
+  <div id="proofSection" style="display:none;margin-top:12px">
+    <input id="proofFile" type="file" class="input">
+    <input id="proofEmail" type="email" class="input" placeholder="Your email">
+    <button id="sendProof" class="btn" style="margin-top:8px">Send Proof</button>
+  </div>
+
+  <div id="status" class="status"></div>
+  <div class="note">Open this page inside any Solana wallet or on HTTPS for desktop wallet extensions.</div>
+
+  <div class="gallery" id="gallery" aria-live="polite"></div>
 </div>
+
 <canvas id="confettiCanvas" class="canvas"></canvas>
 
 <script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Softfund page loaded');
+  const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3;
+  const connectBtn = document.getElementById('connectBtn');
+  const connectedEl = document.getElementById('connected');
+  const walletSelect = document.getElementById('walletSelect');
+  const mintBtn = document.getElementById('mintBtn');
+  const quantityEl = document.getElementById('quantity');
+  const totalUSDEl = document.getElementById('totalUSD');
+  const totalSOLEl = document.getElementById('totalSOL');
+  const rateEl = document.getElementById('rate');
+  const progressBar = document.getElementById('progressBar');
+  const counterEl = document.getElementById('counter');
+  const galleryEl = document.getElementById('gallery');
+  const heroImg = document.getElementById('heroImg');
+  const copyTreasury = document.getElementById('copyTreasury');
+  const statusEl = document.getElementById('status');
 
-  const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3 || {};
-
-  if (!Connection) { alert('Solana web3 library missing'); return; }
-
-  // --- CONFIG ---
   const TREASURY = '3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc';
   const PRICE_USD = 3.20;
   const TOTAL_CAP = 5000;
   let minted = parseInt(localStorage.getItem('sf_minted')||'0');
   let quantity = 1;
-  let SOL_PRICE = 150.0; // fallback
+  let SOL_PRICE = 150.0;
+  let provider = null;
+
   const METADATA = [
     "bafkreigrrgeybhfhg3uljhtblqsdtgwrfzaeswgpxozlovwwzaxwe3skim",
     "bafkreibhbkz75rrvu7cl7rrueiw2mj3jx753pedb53bae366nz7dr75bge",
@@ -114,89 +129,92 @@ document.addEventListener('DOMContentLoaded', () => {
     "bafkreicr2rgbnbikcwewi2amsshnnb5zslnodbpijjejrzzj5f65dgngpe",
     "bafkreiab2zgamkt6mztyhz77hilhxodiahhkqqce5wsofl4vibct63qlwu",
     "bafkreice6tscrf5pew37okqewg3jtbu4x5svlqdh7hwd2azmpxfkhux3oi",
-    "bafkreibaih534ahpshn4fjhocz63e66tgp4mvi52t6qhesajsambzqqnmm",
-    "bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le"
-  ];
-  const STORAGE = { records:'sf_records', nextIdx:'sf_nextidx', minted:'sf_minted' };
+    "bafkreibaih534ahpshn4fjhocz63e66tgp4m
 
-  const connectBtn = document.getElementById('connectBtn');
-  const connectedEl = document.getElementById('connected');
-  const decBtn = document.getElementById('dec');
-  const incBtn = document.getElementById('inc');
-  const quantityEl = document.getElementById('quantity');
-  const totalUSDEl = document.getElementById('totalUSD');
-  const totalSOLEl = document.getElementById('totalSOL');
-  const rateEl = document.getElementById('rate');
-  const mintBtn = document.getElementById('mintBtn');
-  const progressBar = document.getElementById('progressBar');
-  const counterEl = document.getElementById('counter');
-  const galleryEl = document.getElementById('gallery');
-  const heroImg = document.getElementById('heroImg');
-  const soldOutEl = document.getElementById('soldOut');
-  const proofSection = document.getElementById('proofSection');
-  const copyTreasury = document.getElementById('copyTreasury');
-  const statusEl = document.getElementById('status');
+"bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le",
+    "bafkreidstjrabmghkjqwjcpct2"
+  ];
 
   const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
-  let provider = null;
-  let records = JSON.parse(localStorage.getItem(STORAGE.records)||"[]");
-  let nextIndex = parseInt(localStorage.getItem(STORAGE.nextIdx)||'0');
+  let records = JSON.parse(localStorage.getItem('sf_records') || "[]");
+  let nextIndex = parseInt(localStorage.getItem('sf_nextIdx') || '0');
 
-  // --- MOBILE WALLET REDIRECT ---
-  (function mobileRedirect(){
-    if(!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
-    const currentUrl = encodeURIComponent(location.href);
-    const walletLinks = [
-      `https://phantom.app/ul/v1/connect?app_url=${currentUrl}`,
-      `solflare://connect?app_url=${currentUrl}`,
-      `sollet://connect?app_url=${currentUrl}`,
-      `https://backpack.app/ul/v1/connect?app_url=${currentUrl}`,
-      `trust://connect?app_url=${currentUrl}`
-    ];
-    if(confirm('Open this page in your Solana wallet app for a smooth minting experience?')){
-      for(const link of walletLinks){
-        window.location.href = link;
-        break;
-      }
+  function renderQuantity(){ quantityEl.textContent = quantity; }
+  function updatePrice(){
+    const totalUSD = PRICE_USD * quantity;
+    const totalSOL = totalUSD / SOL_PRICE;
+    totalUSDEl.textContent = totalUSD.toFixed(2);
+    totalSOLEl.textContent = totalSOL.toFixed(6);
+    rateEl.textContent = `(1 SOL = $${SOL_PRICE.toFixed(2)})`;
+    document.getElementById('treasury').textContent = TREASURY;
+  }
+  function renderGallery(){
+    galleryEl.innerHTML='';
+    const show = records.slice(-30).reverse();
+    if(show.length===0){ galleryEl.innerHTML='<div class="small" style="color:#9fb0c8">No mints yet</div>'; return; }
+    for(const r of show){
+      const tile=document.createElement('div'); tile.className='tile';
+      const img=document.createElement('img'); img.src=`https://gateway.lighthouse.storage/ipfs/${r.cid}`;
+      const label=document.createElement('div'); label.textContent=`#${r.id}`; label.style.marginTop='6px'; label.style.fontWeight='700';
+      tile.appendChild(img); tile.appendChild(label);
+      galleryEl.appendChild(tile);
     }
-  })();
+  }
+  function fireConfetti(){
+    const canvas=document.getElementById('confettiCanvas'); const ctx=canvas.getContext('2d');
+    canvas.width=innerWidth; canvas.height=innerHeight;
+    const parts=[]; for(let i=0;i<120;i++) parts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.2,dx:(Math.random()-0.5)*6,dy:Math.random()*6+2,s:Math.random()*6+3,color:`hsl(${Math.random()*360},80%,60%)`});
+    let raf;
+    function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of parts){ ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.s,p.s); p.x+=p.dx; p.y+=p.dy; if(p.y>canvas.height)p.y=-10; } raf=requestAnimationFrame(loop); }
+    loop(); setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,canvas.width,canvas.height); },3500);
+  }
 
-  // --- UI EVENT LISTENERS ---
-  decBtn.addEventListener('click',()=>{quantity=Math.max(1,quantity-1);updateUI();});
-  incBtn.addEventListener('click',()=>{quantity=Math.min(10,quantity+1);updateUI();});
-  copyTreasury.addEventListener('click',()=>navigator.clipboard.writeText(TREASURY).then(()=>alert('Copied treasury')));
+  // Quantity buttons
+  document.getElementById('dec').addEventListener('click',()=>{ quantity=Math.max(1,quantity-1); renderQuantity(); updatePrice(); });
+  document.getElementById('inc').addEventListener('click',()=>{ quantity=Math.min(10,quantity+1); renderQuantity(); updatePrice(); });
+  copyTreasury.addEventListener('click',()=>{ navigator.clipboard.writeText(TREASURY).then(()=>alert('Treasury copied')); });
 
-  connectBtn.addEventListener('click',async()=>{
-    const wallets = [window.solana, window.backpack, window.solflare, window.sollet];
-    provider = wallets.find(w=>w&&w.isConnected!==undefined);
-    if(provider){
-      try{
-        await provider.connect({onlyIfTrusted:false});
-        connectedEl.textContent = 'Connected: '+provider.publicKey.toString();
-      }catch(e){ alert('Wallet connection failed'); console.error(e); }
-    }else alert('No wallet detected');
+  // Wallet connection
+  connectBtn.addEventListener('click', async ()=>{
+    const wallet = walletSelect.value;
+    if(wallet==='phantom' && window.solana?.isPhantom) provider=window.solana;
+    else if(wallet==='solflare' && window.solflare?.isSolflare) provider=window.solflare;
+    else if(wallet==='backpack' && window.backpack) provider=window.backpack;
+    else if(wallet==='sollet' && window.sollet) provider=window.sollet;
+    else if(wallet==='trust') {
+      if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+        const link='solana:connect?app_url='+encodeURIComponent(location.href);
+        window.location.href=link; return;
+      }
+      alert('Trust wallet requires mobile deep-link');
+      return;
+    }
+    if(!provider){ alert('Wallet not found'); return; }
+    try{ await provider.connect(); connectedEl.textContent='Connected: '+provider.publicKey.toString(); }
+    catch(e){ alert('Connection failed: '+e?.message); }
   });
 
-  mintBtn.addEventListener('click', async()=>{
-    if(minted>=TOTAL_CAP){alert('Sold out');return;}
+  // Mint button
+  mintBtn.addEventListener('click', async ()=>{
+    if(minted>=TOTAL_CAP){ alert('Sold out'); return; }
     const totalUSD = PRICE_USD*quantity;
     const totalSOL = totalUSD/SOL_PRICE;
     const lamports = Math.round(totalSOL*LAMPORTS_PER_SOL);
-    if(provider&&provider.publicKey){
-      if(!confirm(`Send ${totalSOL.toFixed(6)} SOL to treasury? Approve in your wallet.`)) return;
+
+    if(provider?.publicKey){
+      if(!confirm(`Send ${totalSOL.toFixed(6)} SOL to treasury? Approve in wallet.`)) return;
       mintBtn.disabled=true; mintBtn.textContent='Waiting for approval...'; statusEl.textContent='';
       try{
-        const fromPubkey = provider.publicKey;
-        const toPubkey = new PublicKey(TREASURY);
-        const tx = new Transaction().add(SystemProgram.transfer({fromPubkey,toPubkey,lamports}));
-        tx.feePayer = fromPubkey;
-        tx.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+        const tx = new Transaction().add(SystemProgram.transfer({fromPubkey:provider.publicKey,toPubkey:new PublicKey(TREASURY),lamports}));
+        tx.feePayer=provider.publicKey;
+        tx.recentBlockhash=(await connection.getRecentBlockhash()).blockhash;
         const signed = await provider.signTransaction(tx);
         const raw = signed.serialize();
         const sig = await connection.sendRawTransaction(raw);
         await connection.confirmTransaction(sig,'confirmed');
-        const recs = JSON.parse(localStorage.getItem(STORAGE.records)||"[]");
-        const assigned = [];
+
+        const recs=JSON.parse(localStorage.getItem('sf_records')||"[]");
+        const assigned=[];
         for(let i=0;i<quantity;i++){
           if(minted>=TOTAL_CAP) break;
           const cid=METADATA[nextIndex%METADATA.length];
@@ -206,77 +224,44 @@ document.addEventListener('DOMContentLoaded', () => {
           nextIndex=(nextIndex+1)%METADATA.length;
           minted++;
         }
-        localStorage.setItem(STORAGE.records,JSON.stringify(recs));
-        localStorage.setItem(STORAGE.nextIdx,String(nextIndex));
-        localStorage.setItem(STORAGE.minted,String(minted));
+        localStorage.setItem('sf_records',JSON.stringify(recs));
+        localStorage.setItem('sf_nextIdx',nextIndex);
+        localStorage.setItem('sf_minted',minted);
         records=recs;
-        renderGallery();updateUI();
+        renderGallery(); updateUI();
         statusEl.textContent='Confirmed — tx: '+sig;
         fireConfetti();
-        proofSection.style.display='block';
-        if(assigned.length){heroImg.style.opacity=0.3;
-          setTimeout(()=>{heroImg.src=`https://gateway.lighthouse.storage/ipfs/${assigned[assigned.length-1].cid}`; heroImg.style.opacity=1;},350);}
-      }catch(err){console.error(err); alert('Transaction failed: '+err?.message);}
-      finally{mintBtn.disabled=false; mintBtn.textContent='MINT'; updateUI();}
-    }else alert('No wallet connected');
+        if(assigned.length){ heroImg.style.opacity=0.3; setTimeout(()=>{ heroImg.src=`https://gateway.lighthouse.storage/ipfs/${assigned[assigned.length-1].cid}`; heroImg.style.opacity=1; },350); }
+      }catch(err){ alert('Transaction failed: '+err?.message); }
+      finally{ mintBtn.disabled=false; mintBtn.textContent='MINT'; updateUI(); }
+    }else{
+      alert('No wallet connected. Simulate mint instead?');
+    }
   });
 
-  document.getElementById('sendProof').addEventListener('click',()=>{
+  document.getElementById('sendProof').addEventListener('click', ()=>{
     const f=document.getElementById('proofFile').files[0];
     const e=document.getElementById('proofEmail').value;
-    if(!f||!e) return alert('file & email required');
-    alert('Proof recorded (demo)'); proofSection.style.display='none';
+    if(!f||!e){ alert('File & email required'); return; }
+    alert('Proof recorded (demo)'); document.getElementById('proofSection').style.display='none';
   });
 
   function updateUI(){
-    quantityEl.textContent=quantity;
-    counterEl.textContent=`${minted} people have minted`;
+    renderQuantity();
+    counterEl.textContent=`${minted} minted`;
     progressBar.style.width=Math.min(100,(minted/TOTAL_CAP)*100)+'%';
-    if(minted>=TOTAL_CAP){soldOutEl.style.display='block'; mintBtn.disabled=true;} else{soldOutEl.style.display='none'; mintBtn.disabled=false;}
-    const totalUSD=PRICE_USD*quantity;
-    const totalSOL=totalUSD/SOL_PRICE;
-    totalUSDEl.textContent=totalUSD.toFixed(3);
-    totalSOLEl.textContent=totalSOL.toFixed(6);
-    rateEl.textContent=`(1 SOL = $${SOL_PRICE.toFixed(2)})`;
+    if(minted>=TOTAL_CAP){ mintBtn.disabled=true; } else { mintBtn.disabled=false; }
+    updatePrice();
   }
 
-  function renderGallery(){
-    galleryEl.innerHTML='';
-    const show = records.slice(-30).reverse();
-    if(!show.length){galleryEl.innerHTML='<div class="small" style="color:#9fb0c8">No mints yet</div>'; return;}
-    for(const r of show){
-      const tile=document.createElement('div'); tile.className='tile';
-      const img=document.createElement('img'); img.src=`https://gateway.lighthouse.storage/ipfs/${r.cid}`;
-      img.alt=`#${r.id}`;
-      const label=document.createElement('div'); label.textContent=`#${r.id}`; label.style.marginTop='6px'; label.style.fontWeight='700';
-      tile.appendChild(img); tile.appendChild(label);
-      galleryEl.appendChild(tile);
-    }
-  }
-
-  function fireConfetti(){
-    const canvas=document.getElementById('confettiCanvas');
-    const ctx=canvas.getContext('2d');
-    canvas.width=innerWidth; canvas.height=innerHeight;
-    const parts=[]; for(let i=0;i<120;i++) parts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.2,dx:(Math.random()-0.5)*6,dy:Math.random()*6+2,s:Math.random()*6+3,color:`hsl(${Math.random()*360},80%,60%)`});
-    let raf; function loop(){ctx.clearRect(0,0,canvas.width,canvas.height);for(const p of parts){ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.s,p.s);p.x+=p.dx;p.y+=p.dy;if(p.y>canvas.height)p.y=-10;} raf=requestAnimationFrame(loop);}
-    loop(); setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,canvas.width,canvas.height); },3500);
-  }
-
-  // fetch SOL price
-  (async function fetchSOLPrice(){
-    try {
-      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-      const j = await r.json();
-      if(j?.solana?.usd) SOL_PRICE = j.solana.usd;
-    } catch(e){ console.warn('price fetch failed', e); }
-    updateUI();
+  // Fetch SOL price
+  (async function(){
+    try{
+      const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+      const j=await r.json(); if(j?.solana?.usd) SOL_PRICE=j.solana.usd;
+    }catch(e){ console.warn('Price fetch failed',e); }
+    updateUI(); renderGallery();
   })();
-
-  // initial render
-  renderGallery();
-  updateUI();
-  console.log('Softfund Mainnet page initialized');
 });
 </script>
 </body>
