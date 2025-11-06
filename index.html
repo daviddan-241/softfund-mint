@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Softfund (STFD) — Mainnet Mint</title>
+<title>Softfund (STFD) — Mint</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg:#0f0f1a;--card:#121226;--accent:#00d4ff;--text:#e6eefc;--muted:#9fb0c8}
@@ -27,15 +27,11 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
 .tile{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;text-align:center}
 .tile img{width:100%;height:90px;object-fit:cover;border-radius:6px}
 .sold{color:#ff6b6b;font-weight:800;font-size:1.05rem;margin-top:12px}
-.input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--text);margin-top:8px}
 .copy-btn{margin-left:8px;padding:6px 8px;border-radius:8px;background:#00d4ff;color:#000;border:none;cursor:pointer}
 .canvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
-.status{margin-top:10px;font-weight:700;color:#a8f0b0}
-.note{font-size:0.85rem;color:#aab;margin-top:8px}
 .wallet-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;z-index:1000}
 .wallet-modal-content{background:#121226;padding:20px;border-radius:14px;display:flex;flex-direction:column;gap:10px}
 .wallet-option{padding:10px;border-radius:10px;background:linear-gradient(90deg,#00d4ff,#00ffa0);text-align:center;font-weight:700;color:#000;cursor:pointer}
-.connect-row{display:flex;gap:8px;align-items:center;margin-top:12px}
 </style>
 </head>
 <body>
@@ -45,85 +41,60 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
     <div class="left">
       <div class="hero">
         <img id="heroImg" src="https://ipfs.io/ipfs/bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra" alt="hero image">
-      </div><div class="controls">
-    <div class="small">Price per STFD: <strong>$3.20</strong></div>
-
-    <div style="margin-top:12px">
-      <div class="small">Quantity</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-        <button class="qty-btn" id="dec">−</button>
-        <div id="quantity">1</div>
-        <button class="qty-btn" id="inc">+</button>
-        <div style="margin-left:12px" class="small">max 10</div>
+      </div>
+      <div class="controls">
+        <div class="small">Price per STFD: <strong>$3.20</strong></div>
+        <div style="margin-top:12px">
+          <div class="small">Quantity</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+            <button class="qty-btn" id="dec">−</button>
+            <div id="quantity">1</div>
+            <button class="qty-btn" id="inc">+</button>
+          </div>
+        </div>
+        <div style="margin-top:12px" class="small">
+          Total: $<span id="totalUSD">3.200</span> USD ≈ <span id="totalSOL">—</span> SOL
+        </div>
+        <div style="margin-top:12px">
+          <button id="mintBtn" class="btn">MINT</button>
+        </div>
+        <div id="connectNotice" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);color:#9fb0c8;font-size:0.9rem;word-break:break-word;">
+          Wallet not detected. Open this page inside <strong>Phantom</strong> or open with <strong>Phantom extension</strong> on desktop.<br>
+          <a href="https://softfund-minter.vercel.app/" target="_blank" style="color:#00d4ff;text-decoration:underline;">https://softfund-minter.vercel.app/</a>
+          <button id="copyLink" style="margin-left:8px;padding:4px 8px;border:none;border-radius:6px;background:#00d4ff;color:#000;cursor:pointer;font-weight:600;">Copy</button>
+        </div>
       </div>
     </div>
-
-    <div style="margin-top:12px" class="small">
-      Total: $<span id="totalUSD">3.200</span> USD ≈ <span id="totalSOL">—</span> SOL
-      <div id="rate" class="small" style="margin-top:6px"></div>
+    <div class="right">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800">Recent mints</div>
+      </div>
+      <div class="gallery" id="gallery"></div>
     </div>
-
-    <div class="connect-row">
-      <button id="connectBtn" class="btn">Connect Wallet</button>
-      <button id="mintBtn" class="btn" style="opacity:0.95" disabled>MINT</button>
-    </div>
-
-    <div style="margin-top:12px" class="small">Recipient: <span id="treasury" class="addr">3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc</span>
-      <button class="copy-btn" id="copyTreasury">Copy</button>
-    </div>
-
-    <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
-    <div id="counter" class="small" style="margin-top:8px"></div>
-
-    <div id="status" class="status"></div>
   </div>
 </div>
+<script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script>
+<script>
+const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3;
+const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+const TREASURY = '3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc';
+const PRICE_USD = 3.20;
+let SOL_PRICE = 150;
+let provider = null;const mintBtn = document.getElementById('mintBtn'); const connectNotice = document.getElementById('connectNotice'); const copyLink = document.getElementById('copyLink'); const totalUSDEl = document.getElementById('totalUSD'); const totalSOLEl = document.getElementById('totalSOL');
 
-<div class="right">
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div style="font-weight:800">Recent mints</div>
-    <div class="small">Cap: <strong id="cap">5000</strong></div>
-  </div>
+async function fetchSOLPrice(){ try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');const j=await r.json();if(j.solana?.usd)SOL_PRICE=j.solana.usd;}catch(e){console.warn(e);}updateTotal();}
 
-  <div id="soldOut" class="sold" style="display:none">SOLD OUT — 5000 MINTED</div>
+function updateTotal(){const totalUSD=parseFloat(totalUSDEl.textContent);const totalSOL=totalUSD/SOL_PRICE;totalSOLEl.textContent=totalSOL.toFixed(6);}
 
-  <div class="gallery" id="gallery" aria-live="polite"></div>
-</div>
+copyLink.addEventListener('click',()=>{navigator.clipboard.writeText('https://softfund-minter.vercel.app/').then(()=>alert('Link copied'));});
 
-  </div>
-</div><canvas id="confettiCanvas" class="canvas"></canvas>
+document.getElementById('dec').onclick=()=>{const q=document.getElementById('quantity');let n=parseInt(q.textContent);if(n>1){q.textContent=--n;updateTotal();}}; document.getElementById('inc').onclick=()=>{const q=document.getElementById('quantity');let n=parseInt(q.textContent);if(n<10){q.textContent=++n;updateTotal();}};
 
-<div class="wallet-modal" id="walletModal">
-  <div class="wallet-modal-content">
-    <div class="wallet-option" data-wallet="phantom">Open Phantom (recommended)</div>
-    <div class="wallet-option" data-wallet="solflare">Open Solflare</div>
-    <div class="wallet-option" data-wallet="trust">Open Trust Wallet (Android only)</div>
-    <div class="wallet-option" data-wallet="cancel">Cancel</div>
-  </div>
-</div><script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script><script>
-document.addEventListener('DOMContentLoaded', () => {
-  const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3;
-  const TREASURY = '3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc';
-  const PRICE_USD = 3.20;
-  const TOTAL_CAP = 5000;
-  let minted = parseInt(localStorage.getItem('sf_minted') || '0');
-  let quantity = 1;
-  let SOL_PRICE = 150.0;
-  const METADATA = ["bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le"];
-  const STORAGE = { records:'sf_records', nextIdx:'sf_nextidx', minted:'sf_minted' };
+async function connectWallet(){ if(window.solana && window.solana.isPhantom){ try{await window.solana.connect();provider=window.solana;connectNotice.style.display='none';} catch(e){connectNotice.style.display='block';} }else{ connectNotice.style.display='block'; } }
 
-  const decBtn=document.getElementById('dec');
-  const incBtn=document.getElementById('inc');
-  const quantityEl=document.getElementById('quantity');
-  const totalUSDEl=document.getElementById('totalUSD');
-  const totalSOLEl=document.getElementById('totalSOL');
-  const rateEl=document.getElementById('rate');
-  const mintBtn=document.getElementById('mintBtn');
-  const connectBtn=document.getElementById('connectBtn');
-  const progressBar=document.getElementById('progressBar');
-  const counterEl=document.getElementById('counter');
-  const galleryEl=document.getElementById('gallery');
-  const heroImg=document.getElementById('heroImg');
-  const soldOutEl=document.getElementById('soldOut');
-  const copyTreasury=document.getElementById('copyTreasury');
- 
+mintBtn.addEventListener('click',async()=>{ await connectWallet(); if(!provider||!provider.publicKey){return;} const quantity=parseInt(document.getElementById('quantity').textContent); const totalUSD=PRICE_USDquantity; const totalSOL=totalUSD/SOL_PRICE; const lamports=Math.round(totalSOLLAMPORTS_PER_SOL); if(!confirm(Send ${totalSOL.toFixed(6)} SOL to treasury? Approve in wallet.))return; try{ const fromPubkey=provider.publicKey; const toPubkey=new PublicKey(TREASURY); const tx=new Transaction().add(SystemProgram.transfer({fromPubkey,toPubkey,lamports})); tx.feePayer=fromPubkey; tx.recentBlockhash=(await connection.getLatestBlockhash()).blockhash; const signed=await provider.signTransaction(tx); const raw=signed.serialize(); const sig=await connection.sendRawTransaction(raw); await connection.confirmTransaction(sig,'confirmed'); alert('Transaction confirmed: '+sig); }catch(e){console.error(e);alert('Transaction failed');} });
+
+fetchSOLPrice(); </script>
+
+</body>
+</html>
