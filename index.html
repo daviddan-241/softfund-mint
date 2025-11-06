@@ -39,21 +39,16 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
   <div class="row">
     <div class="left">
       <div class="hero">
-        <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreigrrgeybhfhg3uljhtblqsdtgwrfzaeswgpxozlovwwzaxwe3skim" alt="hero image">
+        <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
       </div>
+
       <div class="controls">
         <div class="small">Price per STFD: <strong>$3.20</strong></div>
+
         <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
-          <select id="walletSelect" class="input">
-            <option value="phantom">Phantom</option>
-            <option value="solflare">Solflare</option>
-            <option value="backpack">Backpack</option>
-            <option value="sollet">Sollet</option>
-            <option value="trust">Trust Wallet (Mobile)</option>
-          </select>
           <button class="btn" id="connectBtn">Connect Wallet</button>
+          <div id="connected" class="small">Not connected</div>
         </div>
-        <div id="connected" class="small">Not connected</div>
 
         <div style="margin-top:12px">
           <div class="small">Quantity</div>
@@ -66,7 +61,7 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
         </div>
 
         <div style="margin-top:12px" class="small">
-          Total: $<span id="totalUSD">3.20</span> USD ≈ <span id="totalSOL">—</span> SOL
+          Total: $<span id="totalUSD">3.200</span> USD ≈ <span id="totalSOL">—</span> SOL
           <div id="rate" class="small" style="margin-top:6px"></div>
         </div>
 
@@ -81,18 +76,24 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
         <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
         <div id="counter" class="small" style="margin-top:8px"></div>
 
+        <div id="proofSection" style="display:none;margin-top:12px">
+          <input id="proofFile" type="file" class="input">
+          <input id="proofEmail" type="email" class="input" placeholder="Your email">
+          <button id="sendProof" class="btn" style="margin-top:8px">Send Proof</button>
+        </div>
+
         <div id="status" class="status"></div>
-        <div class="note">Open this page with HTTPS. Wallets supported: Phantom, Solflare, Backpack, Sollet, Trust Wallet (mobile).</div>
+        <div class="note">Open this page inside any Solana wallet or host on HTTPS and open with wallet extension/mobile wallet.</div>
       </div>
     </div>
 
     <div class="right">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-weight:800">Recent mints</div>
-        <div class="small">Cap: <strong id="cap">50</strong></div>
+        <div class="small">Cap: <strong id="cap">5000</strong></div>
       </div>
 
-      <div id="soldOut" class="sold" style="display:none">SOLD OUT — 50 MINTED</div>
+      <div id="soldOut" class="sold" style="display:none">SOLD OUT — 5000 MINTED</div>
 
       <div class="gallery" id="gallery" aria-live="polite"></div>
     </div>
@@ -101,152 +102,165 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
 
 <canvas id="confettiCanvas" class="canvas"></canvas>
 
+<!-- Solana web3 -->
 <script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script>
+<!-- Wallet Adapter UMD -->
+<script src="https://unpkg.com/@solana/wallet-adapter-base@0.9.20/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/@solana/wallet-adapter-wallets@0.17.0/lib/index.iife.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', async () => {
   const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3;
-  const TREASURY='3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc';
-  const PRICE_USD=3.2; const TOTAL_CAP=50;
-  let quantity=1, minted=parseInt(localStorage.getItem('sf_minted')||'0'), SOL_PRICE=150.0, provider=null;
-  const METADATA=[
+  const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+
+  const TREASURY = '3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc';
+  const PRICE_USD = 3.2;
+  const TOTAL_CAP = 5000;
+  let minted = parseInt(localStorage.getItem('sf_minted')||'0');
+  let quantity = 1;
+  let SOL_PRICE = 150; // fallback
+  const METADATA = [
     "bafkreigrrgeybhfhg3uljhtblqsdtgwrfzaeswgpxozlovwwzaxwe3skim",
     "bafkreibhbkz75rrvu7cl7rrueiw2mj3jx753pedb53bae366nz7dr75bge",
     "bafkreihed2jfortraobz4yt3xthkeuh4vr56qafzb4bhevfljfg4rry3zy",
     "bafkreihszkho2pxcpbfk77u6fvxdkjllyhtqrek2ui5tbnkkxdlcvqakmi",
     "bafkreiageusgwkhpnf7de5znzg5lgr74okfqdc3gm3tf75afqsmnndywxq",
-    "bafkreicr2rgbnbikcwewi2amsshnnb5zslnodbpijjejrzzj5f65dgngpe",
-    "bafkreiab2zgamkt6mztyhz77hilhxodiahhkqqce5wsofl4vibct63qlwu",
-    "bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra",
-    "bafkreidxd6q6vtpwboxr5eokewalr3ie7xmxjocny5m2ft66fayo5cd6im",
-    "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami"
+    // add your additional metadata here...
   ];
 
-  const walletSelect=document.getElementById('walletSelect');
-  const connectBtn=document.getElementById('connectBtn');
-  const quantityEl=document.getElementById('quantity');
-  const decBtn=document.getElementById('dec');
-  const incBtn=document.getElementById('inc');
-  const mintBtn=document.getElementById('mintBtn');
-  const totalUSDEl=document.getElementById('totalUSD');
-  const totalSOLEl=document.getElementById('totalSOL');
-  const rateEl=document.getElementById('rate');
-  const connectedEl=document.getElementById('connected');
-  const galleryEl=document.getElementById('gallery');
-  const heroImg=document.getElementById('heroImg');
-  const copyTreasury=document.getElementById('copyTreasury');
-  const progressBar=document.getElementById('progressBar');
-  const counterEl=document.getElementById('counter');
-  const statusEl=document.getElementById('status');
-  const soldOutEl=document.getElementById('soldOut');
+  // DOM
+  const connectBtn = document.getElementById('connectBtn');
+  const connectedEl = document.getElementById('connected');
+  const decBtn = document.getElementById('dec');
+  const incBtn = document.getElementById('inc');
+  const quantityEl = document.getElementById('quantity');
+  const totalUSDEl = document.getElementById('totalUSD');
+  const totalSOLEl = document.getElementById('totalSOL');
+  const rateEl = document.getElementById('rate');
+  const mintBtn = document.getElementById('mintBtn');
+  const progressBar = document.getElementById('progressBar');
+  const counterEl = document.getElementById('counter');
+  const galleryEl = document.getElementById('gallery');
+  const heroImg = document.getElementById('heroImg');
+  const soldOutEl = document.getElementById('soldOut');
+  const copyTreasury = document.getElementById('copyTreasury');
+  const statusEl = document.getElementById('status');
 
-  const connection=new Connection('https://api.mainnet-beta.solana.com','confirmed');
+  // Wallet Adapter setup
+  const wallets = [
+    new window.WalletAdapter.PhantomWalletAdapter(),
+    new window.WalletAdapter.SolflareWalletAdapter(),
+    new window.WalletAdapter.SlopeWalletAdapter(),
+    new window.WalletAdapter.TrustWalletAdapter(),
+    new window.WalletAdapter.BackpackWalletAdapter(),
+  ];
+  let selectedWallet = null;
 
-  function renderQuantity(){ quantityEl.textContent=quantity; }
-  function updatePrice(){ const totalUSD=PRICE_USD*quantity; const totalSOL=totalUSD/SOL_PRICE; totalUSDEl.textContent=totalUSD.toFixed(2); totalSOLEl.textContent=totalSOL.toFixed(6); rateEl.textContent=`(1 SOL=$${SOL_PRICE.toFixed(2)})`; }
-  function renderGallery(){ galleryEl.innerHTML=''; const recs=JSON.parse(localStorage.getItem('sf_records')||"[]"); const show=recs.slice(-30).reverse(); if(!show.length){ galleryEl.innerHTML='<div class="small" style="color:#9fb0c8">No mints yet</div>'; return; } for(const r of show){ const tile=document.createElement('div'); tile.className='tile'; const img=document.createElement('img'); img.src=`https://gateway.lighthouse.storage/ipfs/${r.cid}`; const label=document.createElement('div'); label.textContent=`#${r.id}`; label.style.marginTop='6px'; label.style.fontWeight='700'; tile.appendChild(img); tile.appendChild(label); galleryEl.appendChild(tile); } }
-  function fireConfetti(){ const canvas=document.getElementById('confettiCanvas'); const ctx=canvas.getContext('2d'); canvas.width=innerWidth; canvas.height=innerHeight; const parts=[]; for(let i=0;i<120;i++) parts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.2,dx:(Math.random()-0.5)*6,dy:Math.random()*6+2,s:Math.random()*6+3,color:`hsl(${Math.random()*360},80%,60%)`}); let raf; function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of parts){ ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.s,p.s); p.x+=p.dx; p.y+=p.dy; if(p.y>canvas.height)p.y=-10; } raf=requestAnimationFrame(loop); } loop(); setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,canvas.width,canvas.height); },3500); }
+  connectBtn.addEventListener('click', async () => {
+    const names = wallets.map(w=>w.name).join(', ');
+    const walletName = prompt(`Select wallet: ${names}`);
+    selectedWallet = wallets.find(w=>w.name.toLowerCase()===walletName.toLowerCase());
+    if(!selectedWallet) return alert('Wallet not supported');
 
-  decBtn.addEventListener('click', ()=>{ quantity=Math.max(1,quantity-1); renderQuantity(); updatePrice(); });
-  incBtn.addEventListener('click', ()=>{ quantity=Math.min(10,quantity+1); renderQuantity(); updatePrice(); });
-  copyTreasury.addEventListener('click', ()=>{ navigator.clipboard.writeText(TREASURY).then(()=>alert('Copied treasury')); });
-
-  connectBtn.addEventListener('click', async ()=>{
-    const wallet=walletSelect.value;
-    if(wallet==='phantom' && window.solana?.isPhantom) provider=window.solana;
-    else if(wallet==='solflare' && window.solflare?.isSolflare) provider=window.solflare;
-    else if(wallet==='backpack' && window.backpack) provider=window.backpack;
-    else if(wallet==='sollet' && window.sollet) provider=window.sollet;
-    else if(wallet==='trust'){
-      if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
-        window.location.href='solana:connect?app_url='+encodeURIComponent(location.href); return;
-      } alert('Trust wallet requires mobile deep-link'); return;
-    } else { alert('Wallet not found'); return;
-}
-
-    try {
-      await provider.connect();
-      connectedEl.textContent = 'Connected: ' + provider.publicKey.toString();
-      console.log('Connected to', wallet, provider.publicKey.toString());
-    } catch(e){
-      console.warn('Connect failed', e);
-      alert('Connection failed');
+    try{
+      await selectedWallet.connect();
+      connectedEl.textContent = 'Connected: ' + selectedWallet.publicKey.toString();
+    }catch(e){
+      console.error('Connection failed', e);
+      alert('Connection failed: '+e.message);
     }
   });
 
-  mintBtn.addEventListener('click', async ()=>{
+  decBtn.addEventListener('click', ()=>{ quantity=Math.max(1,quantity-1); updateUI(); });
+  incBtn.addEventListener('click', ()=>{ quantity=Math.min(10,quantity+1); updateUI(); });
+
+  copyTreasury.addEventListener('click', ()=>{ navigator.clipboard.writeText(TREASURY).then(()=>alert('Copied treasury')) });
+
+  mintBtn.addEventListener('click', async () => {
     if(minted>=TOTAL_CAP){ alert('Sold out'); return; }
-    const totalUSD = PRICE_USD * quantity;
-    const totalSOL = totalUSD / SOL_PRICE;
-    const lamports = Math.round(totalSOL * LAMPORTS_PER_SOL);
+    const totalUSD = PRICE_USD*quantity;
+    const totalSOL = totalUSD/SOL_PRICE;
+    const lamports = Math.round(totalSOL*LAMPORTS_PER_SOL);
 
-    if(provider && provider.publicKey){
-      if(!confirm(`Send ${totalSOL.toFixed(6)} SOL to treasury? Approve in your wallet.`)) return;
+    if(selectedWallet && selectedWallet.connected){
+      if(!confirm(`Send ${totalSOL.toFixed(6)} SOL to treasury?`)) return;
       mintBtn.disabled=true; mintBtn.textContent='Waiting for approval...'; statusEl.textContent='';
-
       try{
-        const fromPubkey = provider.publicKey;
-        const toPubkey = new PublicKey(TREASURY);
-        const tx = new Transaction().add(SystemProgram.transfer({fromPubkey,toPubkey,lamports}));
-        tx.feePayer = fromPubkey;
-        tx.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+        const tx = new Transaction().add(SystemProgram.transfer({
+          fromPubkey: selectedWallet.publicKey,
+          toPubkey: new PublicKey(TREASURY),
+          lamports
+        }));
+        const sig = await selectedWallet.sendTransaction(tx, connection);
+        await connection.confirmTransaction(sig,'confirmed');
 
-        const signed = await provider.signTransaction(tx);
-        const raw = signed.serialize();
-        const sig = await connection.sendRawTransaction(raw);
-        await connection.confirmTransaction(sig, 'confirmed');
-
-        // update state
-        let recs = JSON.parse(localStorage.getItem('sf_records')||"[]");
-        const assigned = [];
+        const recs = JSON.parse(localStorage.getItem('sf_records')||"[]");
         for(let i=0;i<quantity;i++){
           if(minted>=TOTAL_CAP) break;
           const cid = METADATA[(recs.length+i)%METADATA.length];
-          const id = recs.length+1;
-          recs.push({id,cid,tx:sig,ts:Date.now()});
-          assigned.push({id,cid});
+          recs.push({id:recs.length+1,cid,tx:sig,ts:Date.now()});
           minted++;
+          heroImg.src=`https://gateway.lighthouse.storage/ipfs/${cid}`;
         }
         localStorage.setItem('sf_records',JSON.stringify(recs));
         localStorage.setItem('sf_minted',String(minted));
-        renderGallery();
-        fireConfetti();
-        if(assigned.length){
-          heroImg.style.opacity=0.3;
-          setTimeout(()=>{ heroImg.src=`https://gateway.lighthouse.storage/ipfs/${assigned[assigned.length-1].cid}`; heroImg.style.opacity=1; },350);
-        }
+        renderGallery(); fireConfetti();
         statusEl.textContent='Confirmed — tx: '+sig;
       }catch(err){
-        console.error('Tx error',err);
-        alert('Transaction failed/cancelled: '+(err?.message||err));
+        console.error(err); alert('Transaction failed: '+err.message);
       }finally{
-        mintBtn.disabled=false; mintBtn.textContent='MINT';
-        updateUI();
+        mintBtn.disabled=false; mintBtn.textContent='MINT'; updateUI();
       }
-    } else {
+    }else{
       alert('No wallet connected');
     }
   });
+
+  function renderGallery(){
+    galleryEl.innerHTML='';
+    const recs = JSON.parse(localStorage.getItem('sf_records')||"[]").slice(-30).reverse();
+    if(recs.length===0){ galleryEl.innerHTML='<div class="small" style="color:#9fb0c8">No mints yet</div>'; return; }
+    for(const r of recs){
+      const tile=document.createElement('div'); tile.className='tile';
+      const img=document.createElement('img'); img.src=`https://gateway.lighthouse.storage/ipfs/${r.cid}`;
+      img.alt='#'+r.id;
+      const label=document.createElement('div'); label.textContent='#'+r.id; label.style.marginTop='6px'; label.style.fontWeight='700';
+      tile.appendChild(img); tile.appendChild(label);
+      galleryEl.appendChild(tile);
+    }
+  }
+
+  function updateUI(){
+    quantityEl.textContent=quantity;
+    const totalUSD = PRICE_USD*quantity;
+    const totalSOL = totalUSD/SOL_PRICE;
+    totalUSDEl.textContent=totalUSD.toFixed(3);
+    totalSOLEl.textContent=totalSOL.toFixed(6);
+    rateEl.textContent=`(1 SOL = $${SOL_PRICE.toFixed(2)})`;
+    progressBar.style.width=Math.min(100,(minted/TOTAL_CAP)*100)+'%';
+    counterEl.textContent=`${minted} minted`;
+    soldOutEl.style.display = minted>=TOTAL_CAP?'block':'none';
+    mintBtn.disabled = minted>=TOTAL_CAP;
+  }
 
   async function fetchSOLPrice(){
     try{
       const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
       const j = await r.json();
-      if(j?.solana?.usd) SOL_PRICE = j.solana.usd;
+      if(j?.solana?.usd) SOL_PRICE=j.solana.usd;
     }catch(e){ console.warn('Price fetch failed', e); }
     updateUI();
   }
 
-  function updateUI(){
-    renderQuantity();
-    progressBar.style.width=Math.min(100,(minted/TOTAL_CAP)*100)+'%';
-    counterEl.textContent=`${minted} minted`;
-    if(minted>=TOTAL_CAP){ soldOutEl.style.display='block'; mintBtn.disabled=true; } else { soldOutEl.style.display='none'; mintBtn.disabled=false; }
-    updatePrice();
+  function fireConfetti(){
+    const canvas=document.getElementById('confettiCanvas'); const ctx=canvas.getContext('2d');
+    canvas.width=innerWidth; canvas.height=innerHeight;
+    const parts=[]; for(let i=0;i<120;i++) parts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.2,dx:(Math.random()-0.5)*6,dy:Math.random()*6+2,s:Math.random()*6+3,color:`hsl(${Math.random()*360},80%,60%)`});
+    let raf; function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of parts){ ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.s,p.s); p.x+=p.dx; p.y+=p.dy; if(p.y>canvas.height) p.y=-10; } raf=requestAnimationFrame(loop); }
+    loop(); setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,canvas.width,canvas.height); },3500);
   }
 
-  fetchSOLPrice();
-  renderGallery();
-  updateUI();
+  fetchSOLPrice(); renderGallery(); updateUI();
 });
 </script>
 </body>
