@@ -1,197 +1,91 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Softfund (STFD) — Mint</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-<style>
-:root{--bg:#0f0f1a;--card:#121226;--accent:#00d4ff;--text:#e6eefc;--muted:#9fb0c8}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,system-ui,Arial;background:linear-gradient(135deg,#0f0f1a,#0b1230);color:var(--text);padding:18px;min-height:100vh}
-.container{max-width:920px;margin:20px auto;background:var(--card);border-radius:14px;padding:18px;border:1px solid rgba(0,212,255,0.06);box-shadow:0 12px 30px rgba(0,0,0,0.5)}
-.row{display:flex;gap:20px;flex-wrap:wrap}
-.left{flex:0 0 360px}.right{flex:1}
-h1{text-align:center;margin-bottom:8px;font-weight:700}
-.hero img{width:100%;border-radius:10px;display:block}
-.controls{margin-top:12px}
-.btn{background:linear-gradient(90deg,#00d4ff,#00ffa0);border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;color:#000}
-.small{font-size:0.9rem;color:var(--muted)}
-.addr{font-family:monospace;color:#7ff}
-.qty-btn{width:44px;height:44px;border-radius:10px;border:1px solid rgba(0,212,255,0.08);background:rgba(0,212,255,0.02);color:var(--accent);font-size:20px;cursor:pointer}
-#quantity{display:inline-block;width:48px;text-align:center;font-weight:800;color:#fff}
-.progress{height:10px;background:rgba(255,255,255,0.04);border-radius:6px;overflow:hidden;margin-top:12px}
-.progress-bar{height:100%;background:linear-gradient(90deg,#00d4ff,#00ff88);width:0%;transition:width .8s}
-.gallery{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
-.tile{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;text-align:center}
-.tile img{width:100%;height:90px;object-fit:cover;border-radius:6px}
-.sold{color:#ff6b6b;font-weight:800;font-size:1.05rem;margin-top:12px}
-.input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--text);margin-top:8px}
-.copy-btn{margin-left:8px;padding:6px 8px;border-radius:8px;background:#00d4ff;color:#000;border:none;cursor:pointer}
-.canvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
-.status{margin-top:10px;font-weight:700;color:#a8f0b0}
-.note{font-size:0.85rem;color:#aab;margin-top:8px}
-.wallet-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;z-index:1000}
-.wallet-modal-content{background:#121226;padding:20px;border-radius:14px;display:flex;flex-direction:column;gap:10px}
-.wallet-option{padding:10px;border-radius:10px;background:linear-gradient(90deg,#00d4ff,#00ffa0);text-align:center;font-weight:700;color:#000;cursor:pointer}
-#connectNotice{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#00d4ff,#00ffa0);color:#000;padding:12px 16px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.4);font-weight:700;z-index:9999;display:flex;align-items:center;gap:8px;max-width:90%;flex-wrap:wrap;}
-#connectNotice a{color:#000;text-decoration:underline;font-weight:800;}
-#connectNotice button{padding:6px 10px;border:none;border-radius:8px;background:#000;color:#00ffa0;font-weight:700;cursor:pointer;}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Softfund (STFD) — Mint</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="container">
-  <h1>Softfund (STFD)</h1>
-  <div class="row">
-    <div class="left">
-      <div class="hero">
-        <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
-      </div>
-      <div class="controls">
-        <div class="small">Price per STFD: <strong>$3.20</strong></div>
-        <div style="margin-top:12px">
-          <div class="small">Quantity</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-            <button class="qty-btn" id="dec">−</button>
-            <div id="quantity">1</div>
-            <button class="qty-btn" id="inc">+</button>
-            <div style="margin-left:12px" class="small">max 10</div>
+  <div id="topNotice" class="top-notice" style="display:none;">
+    If connection fails, copy & open inside Phantom (or paste into your wallet):
+    <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
+    <button id="copyNotice" class="small-btn">Copy</button>
+  </div>
+
+  <div class="container">
+    <h1>Softfund (STFD)</h1>
+    <div class="row">
+      <div class="left">
+        <div class="hero">
+          <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
+        </div>
+
+        <div class="controls">
+          <div class="small">Price per STFD: <strong>$3.20</strong></div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+            <button class="btn" id="phantomBtn">Connect Phantom</button>
+            <button class="btn" id="trustBtn">Open Trust Wallet</button>
+            <button class="btn" id="solflareBtn">Connect Solflare</button>
+            <div id="connected" class="small">Not connected</div>
           </div>
+
+          <div style="margin-top:12px">
+            <div class="small">Quantity</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+              <button class="qty-btn" id="dec">−</button>
+              <div id="quantity">1</div>
+              <button class="qty-btn" id="inc">+</button>
+              <div style="margin-left:12px" class="small">max 10</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="small">
+            Total: $<span id="totalUSD">3.200</span> USD ≈ <span id="totalSOL">—</span> SOL
+            <div id="rate" class="small" style="margin-top:6px"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button id="mintBtn" class="btn">MINT (Mainnet)</button>
+          </div>
+
+          <div style="margin-top:12px" class="small">
+            Recipient (Mainnet):
+            <span id="treasury" class="addr">GqB1ywkWHq9jpjDSJkhGxuFVz1H6VBfoyJX32BsCjWue</span>
+            <button class="copy-btn" id="copyTreasury">Copy</button>
+          </div>
+
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+          <div id="counter" class="small" style="margin-top:8px"></div>
+
+          <div id="proofSection" style="display:none;margin-top:12px">
+            <input id="proofFile" type="file" class="input">
+            <input id="proofEmail" type="email" class="input" placeholder="Your email">
+            <button id="sendProof" class="btn" style="margin-top:8px">Send Proof</button>
+          </div>
+
+          <div id="status" class="status"></div>
+          <div class="note">Open this page inside Phantom (Mainnet) or host on HTTPS and open with Phantom extension on desktop.</div>
         </div>
-        <div style="margin-top:12px" class="small">
-          Total: $<span id="totalUSD">3.200</span> USD ≈ <span id="totalSOL">—</span> SOL
+      </div>
+
+      <div class="right">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:800">Recent mints</div>
+          <div class="small">Cap: <strong id="cap">5000</strong></div>
         </div>
-        <div style="margin-top:12px">
-          <button id="mintBtn" class="btn">MINT</button>
-        </div>
-        <div style="margin-top:12px" class="small">Recipient: <span class="addr">3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc</span></div>
-        <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+
+        <div id="soldOut" class="sold" style="display:none">SOLD OUT — 5000 MINTED</div>
+
+        <div class="gallery" id="gallery" aria-live="polite"></div>
       </div>
     </div>
-    <div class="right">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:800">Recent mints</div>
-        <div class="small">Cap: <strong id="cap">5000</strong></div>
-      </div>
-      <div class="gallery" id="gallery" aria-live="polite"></div>
-    </div>
   </div>
-</div>
 
-<canvas id="confettiCanvas" class="canvas"></canvas>
+  <canvas id="confettiCanvas" class="canvas"></canvas>
 
-<div id="connectNotice">
-  <span>Open this page inside Phantom, Trust Wallet, or Solflare:</span>
-  <a id="connectLink" href="https://softfund-minter.vercel.app/" target="_blank">Open Link</a>
-  <button id="copyLink">Copy</button>
-</div>
-
-<div class="wallet-modal" id="walletModal">
-  <div class="wallet-modal-content">
-    <div class="wallet-option" data-wallet="phantom">Phantom</div>
-    <div class="wallet-option" data-wallet="trust">Trust Wallet</div>
-    <div class="wallet-option" data-wallet="solflare">Solflare</div>
-  </div>
-</div>
-
-<script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script>
-<script>
-const TREASURY = '3GM4KD2PJvmqx1MeMgT65Gkq7qqWu9bo9TpTcGgpyTPc';
-const PRICE_USD = 3.2;
-const TOTAL_CAP = 5000;
-let SOL_PRICE = 150;
-let quantity = 1;
-let minted = parseInt(localStorage.getItem('sf_minted')||'0');
-const SAMPLE_CIDS = ['bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le','bafkreidiimwvc36ekicyuxugmo7wcsdhvye3l3fz4l34lvs3lf44tsrqra'];
-
-const {Connection,PublicKey,SystemProgram,Transaction,LAMPORTS_PER_SOL} = window.solanaWeb3;
-const connection = new Connection('https://api.mainnet-beta.solana.com','confirmed');
-let provider = null;
-
-const decBtn=document.getElementById('dec');
-const incBtn=document.getElementById('inc');
-const qtyEl=document.getElementById('quantity');
-const totalUSDEl=document.getElementById('totalUSD');
-const totalSOLEl=document.getElementById('totalSOL');
-const mintBtn=document.getElementById('mintBtn');
-const heroImg=document.getElementById('heroImg');
-const galleryEl=document.getElementById('gallery');
-const walletModal=document.getElementById('walletModal');
-const walletOptions=document.querySelectorAll('.wallet-option');
-const connectNotice=document.getElementById('connectNotice');
-const copyLink=document.getElementById('copyLink');
-
-function updateTotals(){ totalUSDEl.textContent=(PRICE_USD*quantity).toFixed(3); totalSOLEl.textContent=((PRICE_USD*quantity)/SOL_PRICE).toFixed(6); }
-updateTotals();
-
-// Quantity buttons
-decBtn.addEventListener('click',()=>{ if(quantity>1){ quantity--; qtyEl.textContent=quantity; updateTotals(); }});
-incBtn.addEventListener('click',()=>{ if(quantity<10){ quantity++; qtyEl.textContent=quantity; updateTotals(); }});
-
-// Copy notice
-copyLink.addEventListener('click',()=>{ navigator.clipboard.writeText('https://softfund-minter.vercel.app/').then(()=>alert('Link copied!')); });
-
-// Fetch SOL price
-(async function(){ try{ const res=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'); const data=await res.json(); if(data?.solana?.usd) SOL_PRICE=data.solana.usd; }catch(e){console.warn(e);} updateTotals(); })();
-
-// Render gallery
-function renderGallery(){
-  galleryEl.innerHTML='';
-  const recent=JSON.parse(localStorage.getItem('sf_records')||'[]').slice(-10).reverse();
-  for(const r of recent)addTile(r.cid,r.id);
-  SAMPLE_CIDS.forEach((cid,i)=> addTile(cid,'s'+(i+1)));
-}
-function addTile(cid,id){
-  const tile=document.createElement('div'); tile.className='tile';
-  const img=document.createElement('img'); img.src=`https://gateway.lighthouse.storage/ipfs/${cid}`; img.alt='#'+id;
-  const label=document.createElement('div'); label.textContent='#'+id; label.style.marginTop='6px'; label.style.fontWeight='700';
-  tile.appendChild(img); tile.appendChild(label);
-  galleryEl.appendChild(tile);
-}
-renderGallery();
-
-// Mint button opens wallet modal
-mintBtn.addEventListener('click',()=>{ walletModal.style.display='flex'; });
-
-// Wallet selection
-walletOptions.forEach(opt=>{
-  opt.addEventListener('click',async ()=>{
-    const wallet=opt.dataset.wallet;
-    walletModal.style.display='none';
-    if(wallet==='phantom'){ if(window.solana&&window.solana.isPhantom){ try{ await window.solana.connect(); provider=window.solana; }catch(e){ alert('Failed to connect Phantom'); return; } }else{ alert('Install Phantom'); return; } }
-    else if(wallet==='trust'){ window.location.href=`solana:connect?app_url=${encodeURIComponent(location.href)}`; return; }
-    else if(wallet==='solflare'){ if(window.solflare&&window.solflare.isSolflare){ try{ await window.solflare.connect(); provider=window.solflare; }catch(e){ alert('Failed to connect Solflare'); return; } }else{ alert('Open with Solflare app'); return; } }
-    if(provider&&provider.publicKey) startMint();
-  });
-});
-
-// Mint logic
-async function startMint(){
-  if(minted>=TOTAL_CAP){ alert('Sold out'); return; }
-  const lamports=Math.round((PRICE_USD*quantity/SOL_PRICE)*LAMPORTS_PER_SOL);
-  if(!confirm(`Send ${(lamports/LAMPORTS_PER_SOL).toFixed(6)} SOL to treasury? Approve in wallet.`)) return;
-  mintBtn.disabled=true; mintBtn.textContent='Waiting for approval...';
-  try{
-    const tx=new Transaction().add(SystemProgram.transfer({fromPubkey:provider.publicKey,toPubkey:new PublicKey(TREASURY),lamports}));
-    tx.feePayer=provider.publicKey;
-    tx.recentBlockhash=(await connection.getLatestBlockhash()).blockhash;
-    const signed=await provider.signTransaction(tx);
-    const sig=await connection.sendRawTransaction(signed.serialize());
-    await connection.confirmTransaction(sig,'confirmed');
-
-    const recs=JSON.parse(localStorage.getItem('sf_records')||'[]');
-    for(let i=0;i<quantity;i++){ recs.push({id:recs.length+1,cid:SAMPLE_CIDS[i%SAMPLE_CIDS.length],tx:sig,ts:Date.now()}); minted++; }
-    localStorage.setItem('sf_records',JSON.stringify(recs));
-    localStorage.setItem('sf_minted',minted.toString());
-    renderGallery();
-    heroImg.src=`https://gateway.lighthouse.storage/ipfs/${SAMPLE_CIDS[0]}`;
-    alert('Transaction confirmed: '+sig);
-  }catch(e){ console.error(e); alert('Transaction failed'); }
-  finally{ mintBtn.disabled=false; mintBtn.textContent='MINT'; updateTotals(); }
-}
-
-// Show notice instantly if no wallet detected
-if(!(window.solana&&window.solana.isPhantom)&&!window.solflare){ connectNotice.style.display='flex'; }
-</script>
+  <script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
