@@ -7,20 +7,19 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div id="topNotice" class="top-notice" style="display:none;">
+    If connection fails, copy & open inside Phantom (or paste into your wallet):
+    <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
+    <button id="copyNotice" class="small-btn">Copy</button>
+  </div>
+
   <div class="container">
     <h1>Softfund (STFD)</h1>
-
-    <!-- Top notice above hero -->
-    <div id="topNotice" class="top-notice" style="display:none;">
-      If connection fails, copy & open inside Phantom (or paste into your wallet):
-      <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
-      <button id="copyNotice" class="small-btn">Copy</button>
-    </div>
-
     <div class="row">
       <div class="left">
         <div class="hero">
           <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
+          <!-- move top notice over hero image -->
         </div>
 
         <div class="controls">
