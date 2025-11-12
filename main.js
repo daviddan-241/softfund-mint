@@ -1,9 +1,9 @@
 // main.js
-// Softfund frontend (UI shows 'Mint' — runtime uses DEVNET by default).
+// Softfund frontend.
 // IMPORTANT: to switch to MAINNET, change the two constants marked below.
 
 // ---------- CONFIG (change these to go MAINNET) ----------
-const RPC = 'https://api.devnet.solana.com'; // <-- change to mainnet: 'https://api.mainnet-beta.solana.com' or your RPC provider
+const RPC = 'https://api.mainnet-beta.solana.com' or your RPC provider
 const TREASURY = 'GqB1ywkWHq9jpjDSJkhGxuFVz1H6VBfoyJX32BsCjWue'; // <-- change to your MAINNET treasury if/when ready
 // ----------------------------------------------------------------
 
