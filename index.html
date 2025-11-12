@@ -7,15 +7,16 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Top notice moved slightly so it doesn't block buttons -->
-  <div id="topNotice" class="top-notice" style="display:none;">
-    If connection fails, copy & open inside Phantom (or paste into your wallet):
-    <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
-    <button id="copyNotice" class="small-btn">Copy</button>
-  </div>
-
   <div class="container">
     <h1>Softfund (STFD)</h1>
+
+    <!-- Top notice above hero -->
+    <div id="topNotice" class="top-notice" style="display:none;">
+      If connection fails, copy & open inside Phantom (or paste into your wallet):
+      <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
+      <button id="copyNotice" class="small-btn">Copy</button>
+    </div>
+
     <div class="row">
       <div class="left">
         <div class="hero">
@@ -57,8 +58,8 @@
             <button class="copy-btn" id="copyTreasury">Copy</button>
           </div>
 
-          <div id="counter" class="small" style="margin-top:8px">5 people have minted</div>
-          <div class="progress"><div id="progressBar" class="progress-bar" style="width:0%"></div></div>
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+          <div id="counter" class="small" style="margin-top:8px"></div>
 
           <div id="proofSection" style="display:none;margin-top:12px">
             <input id="proofFile" type="file" class="input">
