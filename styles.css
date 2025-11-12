@@ -12,8 +12,8 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
 .addr{font-family:monospace;color:#7ff}
 .qty-btn{width:44px;height:44px;border-radius:10px;border:1px solid rgba(0,212,255,0.08);background:rgba(0,212,255,0.02);color:var(--accent);font-size:20px;cursor:pointer}
 #quantity{display:inline-block;width:48px;text-align:center;font-weight:800;color:#fff}
-.progress{height:10px;background:rgba(255,255,255,0.04);border-radius:6px;overflow:hidden;margin-top:12px}
-.progress-bar{height:100%;background:linear-gradient(90deg,#00d4ff,#00ff88);width:0%;transition:width .8s}
+.progress{height:24px;background:rgba(255,255,255,0.04);border-radius:6px;overflow:hidden;margin-top:12px;position:relative}
+.progress-bar{height:100%;background:linear-gradient(90deg,#00d4ff,#00ff88);width:0%;transition:width .8s;color:#000;font-weight:700;text-align:center;line-height:24px}
 .gallery{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
 .tile{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;text-align:center}
 .tile img{width:100%;height:90px;object-fit:cover;border-radius:6px}
@@ -28,7 +28,6 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
 .top-notice{
   position:fixed;
   top:14px;
-  left:50%;
   transform:translateX(-50%);
   background:linear-gradient(90deg,#00d4ff,#00ffa0);
   color:#000;
