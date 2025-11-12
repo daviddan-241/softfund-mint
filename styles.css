@@ -24,17 +24,20 @@ h1{text-align:center;margin-bottom:8px;font-weight:700}
 .status{margin-top:10px;font-weight:700;color:#a8f0b0}
 .note{font-size:0.85rem;color:#aab;margin-top:8px}
 
-/* top notice - inline (won't overlap connect buttons) */
+/* top notice */
 .top-notice{
-  position:relative;
+  position:fixed;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,#00d4ff,#00ffa0);
+  color:#000;
+  padding:10px 12px;
+  border-radius:10px;
+  z-index:9999;
+  font-weight:700;
   display:flex;
   gap:8px;
   align-items:center;
-  background:linear-gradient(90deg,#00d4ff,#00ffa0);
-  color:#000;
-  padding:8px 10px;
-  border-radius:8px;
-  font-weight:700;
-  margin-top:8px;
 }
 .small-btn{padding:6px 8px;border-radius:8px;border:none;background:#000;color:#00ffa0;cursor:pointer}
