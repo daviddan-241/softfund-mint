@@ -7,12 +7,6 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="topNotice" class="top-notice" style="display:none;">
-    If connection fails, copy & open inside Phantom (or paste into your wallet):
-    <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
-    <button id="copyNotice" class="small-btn">Copy</button>
-  </div>
-
   <div class="container">
     <h1>Softfund (STFD)</h1>
     <div class="row">
@@ -31,6 +25,13 @@
             <div id="connected" class="small">Not connected</div>
           </div>
 
+          <!-- NOTICE (moved into flow so it doesn't block buttons) -->
+          <div id="topNotice" class="top-notice" style="display:none;margin-top:10px;">
+            If connection fails, copy & open inside Phantom (or paste into your wallet):
+            <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
+            <button id="copyNotice" class="small-btn">Copy</button>
+          </div>
+
           <div style="margin-top:12px">
             <div class="small">Quantity</div>
             <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
@@ -47,12 +48,11 @@
           </div>
 
           <div style="margin-top:12px">
-            <button id="mintBtn" class="btn">MINT (Mainnet)</button>
+            <button id="mintBtn" class="btn">MINT</button>
           </div>
 
           <div style="margin-top:12px" class="small">
-            Recipient (Mainnet):
-            <span id="treasury" class="addr">GqB1ywkWHq9jpjDSJkhGxuFVz1H6VBfoyJX32BsCjWue</span>
+            Recipient: <span id="treasury" class="addr">GqB1ywkWHq9jpjDSJkhGxuFVz1H6VBfoyJX32BsCjWue</span>
             <button class="copy-btn" id="copyTreasury">Copy</button>
           </div>
 
@@ -66,7 +66,7 @@
           </div>
 
           <div id="status" class="status"></div>
-          <div class="note">Open this page inside Phantom (Mainnet) or host on HTTPS and open with Phantom extension on desktop.</div>
+          <div class="note">Open this page inside Phantom or host on HTTPS and open with Phantom extension on desktop.</div>
         </div>
       </div>
 
