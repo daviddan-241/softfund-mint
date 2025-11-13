@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="topNotice" class="top-notice" style="display:none;top:220px;left:50%;transform:translateX(-50%);">
+  <!-- TOP NOTICE: moved below hero image so it does not block buttons -->
+  <div id="topNotice" class="top-notice" style="display:none; top:180px;">
     If connection fails, copy & open inside Phantom (or paste into your wallet):
     <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
     <button id="copyNotice" class="small-btn">Copy</button>
@@ -19,12 +20,12 @@
       <div class="left">
         <div class="hero">
           <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
-          <button class="copy-btn" id="copyTreasury" style="position:absolute;top:8px;left:8px;">Copy Treasury</button>
         </div>
 
         <div class="controls">
           <div class="small">Price per STFD: <strong>$3.20</strong></div>
 
+          <!-- Wallet buttons -->
           <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
             <button class="btn" id="phantomBtn">Connect Phantom</button>
             <button class="btn" id="trustBtn">Open Trust Wallet</button>
@@ -49,6 +50,13 @@
 
           <div style="margin-top:12px">
             <button id="mintBtn" class="btn">MINT (Mainnet)</button>
+          </div>
+
+          <!-- Treasury section -->
+          <div style="margin-top:12px" class="small">
+            Recipient (Mainnet):
+            <span id="treasury" class="addr">GqB1ywkWHq9jpjDSJkhGxuFVz1H6VBfoyJX32BsCjWue</span>
+            <button class="copy-btn" id="copyTreasury">Copy</button>
           </div>
 
           <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
