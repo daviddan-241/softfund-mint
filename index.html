@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Softfund (STFD) — Mint</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Top notice (move above hero image so it doesn't block buttons) -->
+  <div id="topNotice" class="top-notice">
+    Copy & open inside Phantom (or paste into your wallet):
+    <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
+    <button id="copyNotice" class="small-btn">Copy</button>
+  </div>
+
+  <div class="container">
+    <h1>Softfund (STFD)</h1>
+    <div class="row">
+      <div class="left">
+        <div class="hero">
+          <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
+        </div>
+
+        <div class="controls">
+          <div class="small">Price per STFD: <strong>$3.20</strong></div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+            <button class="btn" id="phantomBtn">Connect Phantom</button>
+            <button class="btn" id="trustBtn">Open Trust Wallet</button>
+            <button class="btn" id="solflareBtn">Connect Solflare</button>
+            <div id="connected" class="small">Not connected</div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="small">Quantity</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+              <button class="qty-btn" id="dec">−</button>
+              <div id="quantity">1</div>
+              <button class="qty-btn" id="inc">+</button>
+              <div style="margin-left:12px" class="small">max 10</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="small">
+            Total: $<span id="totalUSD">3.200</span> USD ≈ <span id="totalSOL">—</span> SOL
+            <div id="rate" class="small" style="margin-top:6px"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button id="mintBtn" class="btn">MINT (Mainnet)</button>
+          </div>
+
+          <div style="margin-top:12px" class="small">
+            Recipient (Mainnet):
+            <span id="treasury" class="addr">GqB1ywkWHq9jpjDSJkhGxuFVz1H6VBfoyJX32BsCjWue</span>
+            <button class="copy-btn" id="copyTreasury">Copy</button>
+          </div>
+
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+          <div id="counter" class="small" style="margin-top:8px"></div>
+
+          <div id="proofSection" style="display:none;margin-top:12px">
+            <input id="proofFile" type="file" class="input">
+            <input id="proofEmail" type="email" class="input" placeholder="Your email">
+            <button id="sendProof" class="btn" style="margin-top:8px">Send Proof</button>
+          </div>
+
+          <div id="status" class="status"></div>
+          <div class="note">Open this page inside Phantom (Mainnet) or host on HTTPS and open with Phantom extension on desktop.</div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:800">Recent mints</div>
+          <div class="small">Cap: <strong id="cap">5000</strong></div>
+        </div>
+
+        <div id="soldOut" class="sold" style="display:none">SOLD OUT — 5000 MINTED</div>
+
+        <div class="gallery" id="gallery" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="confettiCanvas" class="canvas"></canvas>
+
+  <script src="https://unpkg.com/@solana/web3.js@1.72.0/lib/index.iife.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
