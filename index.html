@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Top notice moved above hero -->
-  <div id="topNotice" class="top-notice" style="display:none; top:10px;">
-    Open this page inside Phantom, Trust, or Solflare (Mainnet):
-    <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank" style="margin-left:5px;">Softfund Mint</a>
+  <!-- Top Notice moved above hero -->
+  <div id="topNotice" class="top-notice" style="display:none; top:20px; left:50%; transform:translateX(-50%);">
+    If connection fails, copy & open inside Phantom (or paste into your wallet):
+    <a id="noticeLink" href="https://softfund-mintlive.vercel.app/" target="_blank">https://softfund-mintlive.vercel.app/</a>
     <button id="copyNotice" class="small-btn">Copy</button>
   </div>
 
@@ -18,6 +18,7 @@
     <h1>Softfund (STFD)</h1>
     <div class="row">
       <div class="left">
+        <!-- Hero Image -->
         <div class="hero">
           <img id="heroImg" src="https://gateway.lighthouse.storage/ipfs/bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le" alt="hero image">
         </div>
@@ -27,7 +28,7 @@
 
           <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
             <button class="btn" id="phantomBtn">Connect Phantom</button>
-            <button class="btn" id="trustBtn">Connect Trust Wallet</button>
+            <button class="btn" id="trustBtn">Open Trust Wallet</button>
             <button class="btn" id="solflareBtn">Connect Solflare</button>
             <div id="connected" class="small">Not connected</div>
           </div>
@@ -57,9 +58,7 @@
             <button class="copy-btn" id="copyTreasury">Copy</button>
           </div>
 
-          <div class="progress" style="margin-top:12px">
-            <div id="progressBar" class="progress-bar"></div>
-          </div>
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
           <div id="counter" class="small" style="margin-top:8px"></div>
 
           <div id="proofSection" style="display:none;margin-top:12px">
@@ -69,6 +68,7 @@
           </div>
 
           <div id="status" class="status"></div>
+          <div class="note">Open this page inside Phantom (Mainnet) or host on HTTPS and open with Phantom extension on desktop.</div>
         </div>
       </div>
 
@@ -79,6 +79,7 @@
         </div>
 
         <div id="soldOut" class="sold" style="display:none">SOLD OUT — 5000 MINTED</div>
+
         <div class="gallery" id="gallery" aria-live="polite"></div>
       </div>
     </div>
