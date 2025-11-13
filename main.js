@@ -15,11 +15,11 @@
     };
   }
 
-  const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3 || {};
-  if (!Connection) return console.error('Solana web3 not found');
+  const { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = window.solanaWeb3;
+  if (!Connection) { console.error('Solana web3 not found'); return; }
 
   const TREASURY = 'GqB1ywkWHq9jpjDSJkhGxuFVz1H6VBfoyJX32BsCjWue';
-  const PRICE_USD = 3.20;
+  const PRICE_USD = 3.2;
   const TOTAL_CAP = 5000;
   const METADATA = [
     "bafkreidstjrabmghkjqwjcpct24g67flpybxs6gd7vpcg724upwibpy4le",
@@ -30,15 +30,16 @@
     "bafkreibiip2mn32hvppk4fpfcbob4rszyiamru5mazdpcbanihfylhnami"
   ];
 
+  const STORAGE = { records: 'sf_records_main', nextIdx: 'sf_nextidx_main', minted: 'sf_minted_main' };
   let minted = 5; // start with 5 people minted
   let quantity = 1;
   let SOL_PRICE = 150;
-  let records = [];
-  let nextIndex = 0;
+  let records = JSON.parse(localStorage.getItem(STORAGE.records) || '[]');
+  let nextIndex = parseInt(localStorage.getItem(STORAGE.nextIdx) || '0');
 
   const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
 
-  // DOM refs
+  // DOM
   const phantomBtn = document.getElementById('phantomBtn');
   const trustBtn = document.getElementById('trustBtn');
   const solflareBtn = document.getElementById('solflareBtn');
@@ -58,138 +59,174 @@
 
   let provider = null;
 
-  // --- UI functions ---
+  // BroadcastChannel
+  let bc = null;
+  try {
+    bc = new BroadcastChannel('softfund_channel');
+    bc.onmessage = (ev) => { if (ev?.data?.type === 'update') applyRemoteUpdate(ev.data.payload); };
+  } catch (e) { bc = null; }
+
+  function broadcastUpdate(payload) {
+    const msg = { type: 'update', payload };
+    try { if (bc) bc.postMessage(msg); else localStorage.setItem('sf_update_tmp', JSON.stringify({ ts: Date.now(), payload })); } catch (e) {}
+  }
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sf_update_tmp' && e.newValue) {
+      try { const parsed = JSON.parse(e.newValue); applyRemoteUpdate(parsed.payload); } catch (e) {}
+    }
+  });
+
+  function applyRemoteUpdate(payload) {
+    if (!payload) return;
+    if (payload.minted != null) { minted = payload.minted; localStorage.setItem(STORAGE.minted, String(minted)); }
+    if (payload.records) { records = payload.records; localStorage.setItem(STORAGE.records, JSON.stringify(records)); }
+    renderGallery(); updateUI();
+  }
+
+  // UI
   function updateTotals() {
     totalUSDEl.textContent = (PRICE_USD * quantity).toFixed(3);
     totalSOLEl.textContent = ((PRICE_USD * quantity) / SOL_PRICE).toFixed(6);
     qtyEl.textContent = quantity;
   }
+  updateTotals();
 
-  function updateUI() {
-    qtyEl.textContent = quantity;
-    totalUSDEl.textContent = (PRICE_USD * quantity).toFixed(3);
-    totalSOLEl.textContent = ((PRICE_USD * quantity) / SOL_PRICE).toFixed(6);
-    counterEl.textContent = `${minted} people have minted`;
-    progressBar.style.width = Math.min(100, (minted / TOTAL_CAP) * 100) + '%';
-  }
+  decBtn.addEventListener('click', () => { if (quantity > 1) quantity--; updateTotals(); });
+  incBtn.addEventListener('click', () => { if (quantity < 10) quantity++; updateTotals(); });
+  copyTreasury.addEventListener('click', () => navigator.clipboard.writeText(TREASURY).then(() => alert('Treasury copied')));
+  copyNotice.addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('noticeLink').href).then(() => alert('Link copied')));
 
-  function renderGallery() {
+  (async function fetchPrice(){
+    try { const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'); const j = await r.json(); if (j?.solana?.usd) SOL_PRICE = j.solana.usd; } catch(e){ console.warn('price failed', e); }
+    updateTotals();
+  })();
+
+  function renderGallery(){
     galleryEl.innerHTML = '';
     const recent = records.slice(-10).reverse();
-    if (!recent.length) galleryEl.innerHTML = '<div class="small" style="color:#9fb0c8">No mints yet</div>';
+    if (recent.length === 0) galleryEl.innerHTML = '<div class="small" style="color:#9fb0c8">No mints yet</div>';
     else {
       for (const r of recent) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        const img = document.createElement('img');
-        img.src = `https://gateway.lighthouse.storage/ipfs/${r.cid}`;
-        img.alt = `#${r.id}`;
-        const label = document.createElement('div');
-        label.textContent = `#${r.id}`;
-        label.style.marginTop = '6px';
-        label.style.fontWeight = '700';
-        tile.appendChild(img);
-        tile.appendChild(label);
-        galleryEl.appendChild(tile);
+        const tile = document.createElement('div'); tile.className='tile';
+        const img = document.createElement('img'); img.src = `https://gateway.lighthouse.storage/ipfs/${r.cid}`; img.alt = `#${r.id}`;
+        const label = document.createElement('div'); label.textContent = `#${r.id}`; label.style.marginTop='6px'; label.style.fontWeight='700';
+        tile.appendChild(img); tile.appendChild(label); galleryEl.appendChild(tile);
       }
+    }
+    const fill = Math.max(0, 6 - recent.length);
+    for (let i = 0; i < fill; i++){
+      const cid = METADATA[i % METADATA.length];
+      const tile = document.createElement('div'); tile.className = 'tile';
+      const img = document.createElement('img'); img.src = `https://gateway.lighthouse.storage/ipfs/${cid}`; img.alt = `s${i+1}`;
+      const label = document.createElement('div'); label.textContent = `s${i+1}`; label.style.marginTop='6px'; label.style.fontWeight='700';
+      tile.appendChild(img); tile.appendChild(label); galleryEl.appendChild(tile);
     }
   }
 
   function showTopNotice(){ topNotice.style.display = 'flex'; }
   function hideTopNotice(){ topNotice.style.display = 'none'; }
 
-  // --- Button events ---
-  decBtn.addEventListener('click', ()=>{ if(quantity>1) quantity--; updateTotals(); });
-  incBtn.addEventListener('click', ()=>{ if(quantity<10) quantity++; updateTotals(); });
-  copyTreasury.addEventListener('click', ()=> navigator.clipboard.writeText(TREASURY).then(()=>alert('Treasury copied')));
-  copyNotice.addEventListener('click', ()=> navigator.clipboard.writeText(document.getElementById('noticeLink').href).then(()=>alert('Link copied')));
-
+  // Wallet connections
   phantomBtn.addEventListener('click', async ()=>{
-    if(window.solana && window.solana.isPhantom){
-      try{
-        await window.solana.connect();
-        provider = window.solana;
-        connectedEl.textContent = 'Connected: ' + provider.publicKey.toString();
-        hideTopNotice();
-      }catch(e){
-        console.warn('phantom cancel', e);
-        showTopNotice();
-      }
-    } else {
-      window.open(`https://phantom.app/ul/browse/${encodeURIComponent(location.href)}`, '_blank');
-      showTopNotice();
-    }
+    if (window.solana && window.solana.isPhantom) {
+      try { await window.solana.connect(); provider = window.solana; connectedEl.textContent = 'Connected: ' + provider.publicKey.toString(); hideTopNotice(); }
+      catch(e){ console.warn(e); showTopNotice(); alert('Phantom connection cancelled'); }
+    } else { window.open(`https://phantom.app/ul/browse/${encodeURIComponent(location.href)}`, '_blank'); showTopNotice(); }
   });
 
   trustBtn.addEventListener('click', ()=>{
-    // Trust Wallet deep link
-    const url = location.href;
-    const android = `trust://browser_enable?url=${encodeURIComponent(url)}`;
-    const webFallback = `https://link.trustwallet.com/open_url?url=${encodeURIComponent(url)}`;
-    window.location.href = android;
-    setTimeout(()=> window.open(webFallback, '_blank'), 1200);
+    const url = encodeURIComponent(location.href);
+    const deepLink = `trust://browser_enable?url=${url}`;
+    const fallback = `https://link.trustwallet.com/open_url?url=${url}`;
+    window.location.href = deepLink;
+    setTimeout(()=>{ window.open(fallback,'_blank'); showTopNotice(); },1200);
   });
 
   solflareBtn.addEventListener('click', async ()=>{
-    if(window.solflare && window.solflare.isSolflare){
-      try{ await window.solflare.connect(); provider = window.solflare; connectedEl.textContent = 'Connected: ' + provider.publicKey.toString(); hideTopNotice(); }
-      catch(e){ console.warn('solflare cancel', e); showTopNotice(); }
-    } else window.open(`https://solflare.com/ul/browse/${encodeURIComponent(location.href)}`, '_blank');
+    if (window.solflare && window.solflare.isSolflare) {
+      try { await window.solflare.connect(); provider = window.solflare; connectedEl.textContent = 'Connected: ' + provider.publicKey.toString(); hideTopNotice(); }
+      catch(e){ console.warn(e); showTopNotice(); alert('Solflare connection cancelled'); }
+    } else { window.open(`https://solflare.com/ul/browse/${encodeURIComponent(location.href)}`, '_blank'); showTopNotice(); }
   });
 
-  // --- Mint ---
+  // Mint
   mintBtn.addEventListener('click', async ()=>{
-    if(minted >= TOTAL_CAP){ alert('Sold out'); return; }
-    if(!provider || !provider.publicKey){ alert('No wallet connected'); showTopNotice(); return; }
+    if (minted >= TOTAL_CAP) { alert('Sold out'); return; }
+    if (!provider || !provider.publicKey) { alert('No wallet connected'); showTopNotice(); return; }
 
-    const totalSOL = (PRICE_USD * quantity) / SOL_PRICE;
+    const totalSOL = (PRICE_USD * quantity)/SOL_PRICE;
     const lamports = Math.round(totalSOL * LAMPORTS_PER_SOL);
 
-    mintBtn.disabled = true; mintBtn.textContent = 'Waiting for approval...';
+    mintBtn.disabled = true;
+    mintBtn.textContent = 'Processing...';
 
-    try{
-      const tx = new Transaction().add(SystemProgram.transfer({
-        fromPubkey: provider.publicKey,
-        toPubkey: new PublicKey(TREASURY),
-        lamports
-      }));
+    try {
+      const tx = new Transaction().add(
+        SystemProgram.transfer({ fromPubkey: provider.publicKey, toPubkey: new PublicKey(TREASURY), lamports })
+      );
       tx.feePayer = provider.publicKey;
-      const { blockhash } = await connection.getLatestBlockhash('confirmed');
-      tx.recentBlockhash = blockhash;
+      const latest = await connection.getLatestBlockhash();
+      tx.recentBlockhash = latest.blockhash;
 
       let sig;
-      if(provider.signAndSendTransaction){
+      if (provider.signAndSendTransaction) {
         const resp = await provider.signAndSendTransaction(tx);
-        sig = resp.signature || resp;
-      } else if(provider.signTransaction){
+        sig = resp?.signature || resp;
+      } else if (provider.signTransaction) {
         const signed = await provider.signTransaction(tx);
-        const raw = signed.serialize();
-        sig = await connection.sendRawTransaction(raw);
-      } else throw new Error('Wallet cannot sign');
+        sig = await connection.sendRawTransaction(signed.serialize());
+      } else throw new Error('Wallet not supported');
 
       await connection.confirmTransaction(sig, 'confirmed');
+      await postMint(sig);
 
-      // post-mint updates
-      for(let i=0;i<quantity;i++){
-        const cid = METADATA[nextIndex % METADATA.length];
-        records.push({ id: minted+1, cid, tx: sig, ts: Date.now() });
-        nextIndex = (nextIndex+1) % METADATA.length;
-        minted++;
-      }
-
-      renderGallery();
-      updateUI();
-      alert('Transaction confirmed! TX: ' + sig);
-    }catch(e){
-      console.error('Mint failed', e);
-      alert('Transaction failed: ' + (e.message || e));
-    }finally{
-      mintBtn.disabled = false; mintBtn.textContent = 'MINT (Mainnet)';
-    }
+    } catch(err){
+      console.error(err);
+      alert('Transaction failed: ' + (err.message||err));
+    } finally { mintBtn.disabled=false; mintBtn.textContent='MINT (Mainnet)'; }
   });
 
-  // init
-  updateTotals();
-  updateUI();
-  renderGallery();
+  async function postMint(sig){
+    for (let i=0;i<quantity;i++){
+      if (minted>=TOTAL_CAP) break;
+      const cid = METADATA[nextIndex % METADATA.length];
+      const id = records.length + 1;
+      records.push({ id, cid, tx:sig, ts:Date.now() });
+      nextIndex = (nextIndex + 1) % METADATA.length;
+      minted++;
+    }
+
+    localStorage.setItem(STORAGE.records, JSON.stringify(records));
+    localStorage.setItem(STORAGE.nextIdx, String(nextIndex));
+    localStorage.setItem(STORAGE.minted, String(minted));
+
+    broadcastUpdate({ minted, records });
+
+    renderGallery(); updateUI(); doConfetti();
+    document.getElementById('proofSection').style.display = 'block';
+    alert('Transaction confirmed: ' + sig);
+  }
+
+  function updateUI(){
+    qtyEl.textContent = quantity;
+    totalUSDEl.textContent = (PRICE_USD * quantity).toFixed(3);
+    totalSOLEl.textContent = ((PRICE_USD * quantity)/SOL_PRICE).toFixed(6);
+    document.getElementById('rate').textContent = `(1 SOL = $${SOL_PRICE.toFixed(2)})`;
+    document.getElementById('treasury').textContent = TREASURY;
+    counterEl.textContent = `${minted} people have minted`;
+    progressBar.style.width = Math.min(100, (minted/TOTAL_CAP)*100) + '%';
+    document.getElementById('soldOut').style.display = minted>=TOTAL_CAP ? 'block':'none';
+    mintBtn.disabled = minted>=TOTAL_CAP;
+  }
+
+  function doConfetti(){
+    const canvas=document.getElementById('confettiCanvas');const ctx=canvas.getContext('2d');
+    canvas.width=innerWidth;canvas.height=innerHeight;
+    const parts=[];for(let i=0;i<120;i++) parts.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.2,dx:(Math.random()-0.5)*6,dy:Math.random()*6+2,s:Math.random()*6+3,color:`hsl(${Math.random()*360},80%,60%)`});
+    let raf;function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of parts){ ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.s,p.s); p.x+=p.dx;p.y+=p.dy;if(p.y>canvas.height)p.y=-10;} raf=requestAnimationFrame(loop);}
+    loop(); setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,canvas.width,canvas.height); },3500);
+  }
+
+  renderGallery(); updateUI();
 })();
